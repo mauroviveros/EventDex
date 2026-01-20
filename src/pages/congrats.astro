@@ -1,0 +1,45 @@
+---
+import PixelCard from "../components/ui/PixelCard.astro";
+import Index from "./index.astro";
+---
+
+<Index/>
+
+<!-- overlay -->
+<a href="/" class="fixed inset-0 bg-black/50"></a>
+
+<PixelCard class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center gap-8 p-16">
+  <h2 class="text-center text-primary text-5xl">¡Has conseguido una medalla!</h2>
+
+  <div class="flex items-center justify-center pixel-border-sm transition-all w-32 h-32 text-8xl bg-linear-to-br from-medal-gold to-accent medal-glow">
+    <span class="opacity-30">🏔️</span>
+  </div>
+</PixelCard>
+
+<script>
+  var end = Date.now() + (1 * 1000);
+
+  // go Buckeyes!
+  // var colors = ['#bb0000', '#ffffff'];
+
+  (function frame() {
+    confetti({
+      particleCount: 2,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      // colors: colors
+    });
+    confetti({
+      particleCount: 2,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      // colors: colors
+    });
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  }());
+</script>

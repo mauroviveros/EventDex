@@ -1,0 +1,9 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+interface Props extends HTMLAttributes<'article'> {}
+const { class: className, ...props } = Astro.props;
+---
+
+<article class:list={['bg-card p-4 pixel-border', className]}>
+  <slot/>
+</article>

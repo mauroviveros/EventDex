@@ -1,0 +1,72 @@
+---
+import PixelCard from "../components/ui/PixelCard.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <div class="p-4 space-y-6">
+    <PixelCard class="highlight flex items-center gap-4">
+      <img src="placeholder.svg" alt="Avatar del usuario" class="size-20 bg-secondary pixel-border"/>
+      <article>
+        <h3 class="font-pixel text-xs text-foreground">Mauro Daniel Viveros</h3>
+        <p class="font-retro text-muted-foreground">maurod.viveros@gmail.com</p>
+
+        <div>
+          <span class="px-2 py-1 bg-secondary text-secondary-foreground font-retro text-sm pixel-border-sm">USUARIO</span>
+          <span class="font-retro text-sm text-muted-foreground">Desde 2024-01-18</span>
+        </div>
+      </article>
+    </PixelCard>
+
+    <section class="grid grid-cols-3 gap-4">
+      <PixelCard class="flex flex-col items-center">
+        <span class="font-pixel text-accent text-3xl">3</span>
+        <p class="text-sm text-muted-foreground">Visitados</p>
+      </PixelCard>
+
+      <PixelCard class="flex flex-col items-center">
+        <span class="font-pixel text-primary text-3xl">5</span>
+        <p class="text-sm text-muted-foreground">Pendientes</p>
+      </PixelCard>
+
+      <PixelCard class="flex flex-col items-center">
+        <span class="font-pixel text-secondary text-3xl">38%</span>
+        <p class="text-sm text-muted-foreground">Progreso</p>
+      </PixelCard>
+    </section>
+
+    <PixelCard></PixelCard>
+
+    <PixelCard>
+      <h2 class="font-pixel text-xs text-primary mb-6">🏅 TUS MEDALLAS</h2>
+
+      <article class="grid grid-cols-4 gap-8 justify-items-center">
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-linear-to-br from-medal-gold to-accent medal-glow">
+          <span class="opacity-30">🏔️</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-medal-locked grayscale opacity-50">
+          <span class="opacity-30">💎</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-linear-to-br from-medal-gold to-accent medal-glow">
+          <span class="opacity-30">⚡</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-medal-locked grayscale opacity-50">
+          <span class="opacity-30">🌟</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-medal-locked grayscale opacity-50">
+          <span class="opacity-30">🔮</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-linear-to-br from-medal-gold to-accent medal-glow">
+          <span class="opacity-30">🌋</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-medal-locked grayscale opacity-50">
+          <span class="opacity-30">🍃</span>
+        </div>
+        <div class="flex items-center justify-center pixel-border-sm transition-all w-16 h-16 text-3xl bg-medal-locked grayscale opacity-50">
+          <span class="opacity-30">🏆</span>
+        </div>
+
+      </article>
+    </PixelCard>
+  </div>
+</Layout>

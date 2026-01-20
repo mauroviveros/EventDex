@@ -1,0 +1,106 @@
+@import "tailwindcss";
+@import "@fontsource/vt323";
+@import "@fontsource/press-start-2p";
+
+@theme {
+  --color-background: oklch(0.3019 0.04 123.8);
+  --color-foreground: oklch(0.9312 0.0624 122.59);
+  --color-card            : oklch(0.3552 0.043 123.57);
+  --color-card-foreground : oklch(0.9312 0.0624 122.59);
+
+  /* Pokémon Red accent */
+  --color-primary               : oklch(0.5789 0.2217 27.81);
+  --color-primary-foreground    : oklch(1 0 0);
+  /* Game Boy Green */
+  --color-secondary             : oklch(0.566 0.1119 125.38);
+  --color-secondary-foreground  : oklch(0.9539 0.0417 122.2);
+  /* Pokémon Yellow accent */
+  --color-accent                : oklch(0.8408 0.1725 84.2);
+  --color-accent-foreground     : oklch(0.2382 0.0286 123.54);
+  /* Muted */
+  --color-muted                 : oklch(0.4032 0.042097 123.2527);
+  --color-muted-foreground      : oklch(0.7506 0.086 123.44);
+
+  --color-border: oklch(0.4765 0.0706 124.12);
+  --color-input: oklch(0.4118 0.0517 123.66);
+  --color-ring: oklch(0.8408 0.1725 84.2);
+
+  /* medal states */
+  --color-medal-gold  : oklch(0.8309 0.1622 87.87);
+  --color-medal-locked: oklch(0.4371 0.0252 122.44);
+
+  --font-retro: 'VT323', monospace;
+  --font-pixel: 'Press Start 2P', cursive;
+
+  --pixel-shadow: 80 20% 10%;
+
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-retro;
+    @apply h-dvh flex flex-col;
+  }
+  * {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .scanlines {
+    @apply fixed inset-0 pointer-events-none z-40;
+
+    &::after{
+      @apply content-[''] absolute pointer-events-none inset-0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        oklch(0.3019 0.04 123.8 / 0.1) 2px,
+        hsl(var(--pixel-shadow) / 0.1) 2px,
+        hsl(var(--pixel-shadow) / 0.1) 4px
+      );
+    }
+  }
+
+  .pixel-border {
+    box-shadow:
+      4px 0 0 0 var(--color-border),
+      -4px 0 0 0 var(--color-border),
+      0 4px 0 0 var(--color-border),
+      0 -4px 0 0 var(--color-border),
+      4px 4px 0 0 hsl(var(--pixel-shadow)),
+      8px 8px 0 0 hsl(var(--pixel-shadow) / 0.5);
+  }
+
+  .pixel-border-sm {
+    box-shadow:
+      2px 0 0 0 var(--color-border),
+      -2px 0 0 0 var(--color-border),
+      0 2px 0 0 var(--color-border),
+      0 -2px 0 0 var(--color-border),
+      2px 2px 0 0 hsl(var(--pixel-shadow)),
+      4px 4px 0 0 hsl(var(--pixel-shadow) / 0.5);
+  }
+
+  .pixel-border.highlight, .pixel-border-sm.highlight {
+    @apply bg-card text-card-foreground border-4 border-foreground relative;
+    &::before {
+      @apply content-[''] absolute inset-0.5 border-2 border-foreground/5;
+    }
+  }
+
+  .medal-glow {
+    animation: medalPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes medalPulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px hsl(45 90% 55%));
+    }
+    50% {
+      filter: drop-shadow(0 0 16px hsl(45 90% 55%)) drop-shadow(0 0 24px hsl(45 90% 55% / 0.5));
+    }
+  }
+
+}
