@@ -30,6 +30,9 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18
     devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.57
+        version: 1.2.57
       '@iconify-json/tabler':
         specifier: ^1.2.26
         version: 1.2.26
@@ -247,6 +250,9 @@ packages:
 
   '@fontsource/vt323@5.2.7':
     resolution: {integrity: sha512-8JTMM23vMhQxin9Cn/ijty8cNwXW4INrln0VAJ2227Rz0CVfkzM3qr3l/CqudZJ6BXCnbCGUTdf2ym3cTNex8A==}
+
+  '@iconify-json/devicon@1.2.57':
+    resolution: {integrity: sha512-I8oMarkVgcCtSDzYFTVf7WlKSFAXMh5qECEeXsf5+J/MUSu3t76QsvNolfRVwui9LjJAzrZ7EHQFXXIlQ3hIjw==}
 
   '@iconify-json/tabler@1.2.26':
     resolution: {integrity: sha512-92G+ZD70AZgeJf07JfQzH+isnai6DwPcMBuF/qL1F+xAxdXCJzGd3w2RmsRvOmB+w1ImmWEEDms50QivQIjd6g==}
@@ -2049,6 +2055,10 @@ snapshots:
   '@fontsource/press-start-2p@5.2.7': {}
 
   '@fontsource/vt323@5.2.7': {}
+
+  '@iconify-json/devicon@1.2.57':
+    dependencies:
+      '@iconify/types': 2.0.0
 
   '@iconify-json/tabler@1.2.26':
     dependencies:

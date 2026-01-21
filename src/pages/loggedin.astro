@@ -3,7 +3,7 @@ import Card from "../components/ui/Card.astro";
 import PixelCard from "../components/ui/PixelCard.astro";
 import Layout from "../layouts/Layout.astro";
 ---
-<Layout>
+<Layout loggedin={true}>
   <section class="relative flex flex-col items-center justify-center h-full max-w-5xl mx-auto">
     <PixelCard>
       <h3 class="text-xl text-accent">🎟️ Evento activo — 20 y 21 de Enero · 10:00 a 20:00</h3>
@@ -20,7 +20,7 @@ import Layout from "../layouts/Layout.astro";
 
     <div class="mt-16 flex gap-4">
       <a href="/congrats" class="pixel-border p-4">Simular scan QR</a>
-      <a href="/loggedin" class="pixel-border p-4">Iniciar sesión con google</a>
+      <a href="/profile" class="pixel-border p-4">Ver perfil</a>
     </div>
   </section>
 </Layout>
