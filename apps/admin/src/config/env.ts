@@ -6,11 +6,9 @@
  * de build, y solo lo hace cuando el acceso es estático.
  */
 
-export function required(name: string, value: string | undefined): string {
-  if (!value) {
-    throw new Error(`Falta la variable de entorno requerida: ${name}`);
-  }
-  return value;
+export function required(name: string, value?: string): string {
+  if (value) return value;
+  throw new Error(`Falta la variable de entorno requerida: ${name}`);
 }
 
 export const env = {
@@ -25,5 +23,5 @@ export const env = {
       "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     );
-  },
-};
+  }
+}

@@ -1,66 +1,63 @@
-import { CalendarDays, MapPin, ScanLine, Users } from "lucide-react";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Header } from "@/components/header"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getOrganizationEvents } from "@/server/events";
 import { requireMembership } from "@/server/guard";
-import { PageHeader } from "./_components/page-header";
+import { CalendarDays, MapPin, ScanLine, Users } from "lucide-react";
 
-export default async function DashboardPage() {
+export default async function DashboardPage(){
   const { membership } = await requireMembership();
-  const events = await getOrganizationEvents(membership.organizationId);
+  const events = await getOrganizationEvents(membership.organization.id);
 
   const stats = [
     {
       title: "Eventos",
-      icon: CalendarDays,
+      Icon: CalendarDays,
       value: events.length,
-      detail: `${events.filter((e) => e.status === "ACTIVE").length} activos`,
+      detail: `en la organización`,
     },
     {
       title: "Spots",
-      icon: MapPin,
-      value: events.reduce((sum, e) => sum + e.spotCount, 0),
+      Icon: MapPin,
+      value: events.reduce((sum, { count }) => sum + count.spots, 0),
       detail: "en todos los eventos",
     },
     {
       title: "Escaneos",
-      icon: ScanLine,
-      value: events.reduce((sum, e) => sum + e.scanCount, 0),
+      Icon: ScanLine,
+      value: events.reduce((sum, { count }) => sum + count.scans, 0),
       detail: "medallas coleccionadas",
     },
     {
       title: "Participantes",
-      icon: Users,
-      value: events.reduce((sum, e) => sum + e.participantCount, 0),
+      Icon: Users,
+      value: events.reduce((sum, { count }) => sum + count.participants, 0),
       detail: "únicos por evento",
     },
   ];
 
   return (
     <>
-      <PageHeader title={membership.organization.name} />
+      <Header title="Dashboard" />
       <main className="flex flex-col gap-4 p-4">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {stats.map((stat) => (
-            <Card key={stat.title}>
+          {stats.map(({ title, Icon, value, detail }) => (
+            <Card key={title}>
               <CardHeader>
                 <CardDescription className="flex items-center gap-2">
-                  <stat.icon className="size-4" />
-                  {stat.title}
+                  <Icon className="size-4" />
+                  {title}
                 </CardDescription>
+
                 <CardTitle className="text-3xl tabular-nums">
-                  {stat.value}
+                  {value}
                 </CardTitle>
-                <CardDescription>{stat.detail}</CardDescription>
+
+                <CardDescription>{detail}</CardDescription>
               </CardHeader>
             </Card>
           ))}
         </div>
       </main>
     </>
-  );
+  )
 }
