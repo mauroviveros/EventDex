@@ -12,7 +12,7 @@ export type Membership = {
 
 /** Evento de la organización con sus métricas básicas (spots, escaneos, participantes únicos). */
 export type OrganizationEvent = Pick<Tables<"events">, "id" | "title" | "edition" | "status" | "timezone"> & {
-  location: Pick<Tables<"event_locations">, "city"> | null;
+  location: Pick<Tables<"event_locations">, "city" | "country" | "address"> | null;
   schedules: Pick<Tables<"event_schedules">, "start_datetime" | "end_datetime">[];
   range: { start: string; end: string } | null;
   count: { spots: number; scans: number; participants: number; };

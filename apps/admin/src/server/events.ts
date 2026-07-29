@@ -62,9 +62,9 @@ export async function getOrganizationEvents(organizationId: string): Promise<Org
         .from("events")
         .select(`
             id, title, edition, status, timezone, created_at,
-            location:event_locations(city),
+            location:event_locations(city, country, address),
             schedules:event_schedules(start_datetime, end_datetime),
-            spots:event_spots(id)    
+            spots:event_spots(id)
         `)
         .eq("organization_id", organizationId)
         .is("deleted_at", null)

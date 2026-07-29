@@ -1,17 +1,26 @@
-'use client';
+"use client";
 
-import { SidebarContent as SidebarContentWrapper, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { LayoutDashboard } from "lucide-react";
+import { CalendarDays, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  SidebarContent as SidebarContentWrapper,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 const NAV_ITEMS = [
   { title: "Dashboard", href: "/", Icon: LayoutDashboard },
-]
+  { title: "Eventos", href: "/events", Icon: CalendarDays },
+];
 
 export function SidebarContent() {
   const pathname = usePathname();
-  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <SidebarContentWrapper>
@@ -35,5 +44,5 @@ export function SidebarContent() {
         </SidebarMenu>
       </SidebarGroup>
     </SidebarContentWrapper>
-  )
+  );
 }
