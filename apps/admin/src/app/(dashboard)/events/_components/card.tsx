@@ -1,26 +1,45 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, ChartColumn, MapPin, Megaphone, QrCode, Store, Users } from "lucide-react";
-import type { OrganizationEvent } from "@/types";
+import {
+  Calendar,
+  ChartColumn,
+  MapPin,
+  Megaphone,
+  QrCode,
+  Store,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import { EventPhaseBadge } from "@/components/event-phase-badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import type { EventListItem } from "@/types";
 
-type EventsExplorerProps = Readonly<{ event: OrganizationEvent }>;
+type EventsExplorerProps = Readonly<{ event: EventListItem }>;
 export function EventCard({ event }: EventsExplorerProps) {
-  const { title, edition, count, location,  } = event;
+  const { title, edition, count, location } = event;
   const metrics = [
     { label: "Stands", Icon: Store, value: count.spots },
     { label: "Visitantes", Icon: Users, value: count.participants },
     { label: "Escaneos", Icon: QrCode, value: count.scans },
   ];
 
-  const capacity = Math.round((count.scans * 100) / (count.spots * count.participants));
+  const capacity = Math.round(
+    (count.scans * 100) / (count.spots * count.participants),
+  );
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-semibold leading-tight truncate group-hover/card:text-primary transition-colors">
-          {title}
+        <CardTitle className="flex items-center justify-between gap-2 font-semibold leading-tight group-hover/card:text-primary transition-colors">
+          <span className="truncate">{title}</span>
+          <EventPhaseBadge phase={event.phase} className="shrink-0" />
         </CardTitle>
 
         <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
@@ -37,7 +56,10 @@ export function EventCard({ event }: EventsExplorerProps) {
       <CardContent className="space-y-4">
         <article className="grid grid-cols-3 gap-2">
           {metrics.map(({ label, Icon, value }, index) => (
-            <div key={index} className="rounded-lg border border-border/60 bg-muted/30 p-2">
+            <div
+              key={index}
+              className="rounded-lg border border-border/60 bg-muted/30 p-2"
+            >
               <span className="flex items-center gap-1 text-xs uppercase tracking-wide text-muted-foreground">
                 <Icon className="size-3" />
                 {label}
@@ -59,7 +81,12 @@ export function EventCard({ event }: EventsExplorerProps) {
       </CardContent>
 
       <CardFooter className="flex flex-col sm:flex-row gap-2">
-        <Button variant="outline" size="sm" className="w-full flex-none sm:flex-1" asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full flex-none sm:flex-1"
+          asChild
+        >
           <Link href={`/events/${event.id}`}>
             <ChartColumn />
             Estadísticas
@@ -67,11 +94,9 @@ export function EventCard({ event }: EventsExplorerProps) {
         </Button>
 
         <Button size="sm" className="w-full flex-none sm:flex-1" asChild>
-          <Link href={`/events/${event.id}`}>
-            Gestionar
-          </Link>
+          <Link href={`/events/${event.id}`}>Gestionar</Link>
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

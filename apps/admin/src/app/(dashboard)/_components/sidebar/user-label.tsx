@@ -7,7 +7,9 @@ export function UserLabel({ metadata }: UserLabelProps) {
   return (
     <>
       <Avatar>
-        {metadata.avatar && <AvatarImage src={metadata.avatar} alt={metadata.name} />}
+        {metadata.avatar && (
+          <AvatarImage src={metadata.avatar} alt={metadata.name} />
+        )}
         <AvatarFallback>{initials(metadata.name)}</AvatarFallback>
       </Avatar>
 
@@ -16,5 +18,5 @@ export function UserLabel({ metadata }: UserLabelProps) {
         <span className="truncate text-xs">{metadata.email}</span>
       </div>
     </>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, LayoutDashboard } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,10 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const NAV_ITEMS = [
-  { title: "Dashboard", href: "/", Icon: LayoutDashboard },
-  { title: "Eventos", href: "/events", Icon: CalendarDays },
-];
+const NAV_ITEMS = [{ title: "Eventos", href: "/events", Icon: CalendarDays }];
 
 export function SidebarContent() {
   const pathname = usePathname();

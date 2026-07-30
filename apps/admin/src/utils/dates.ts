@@ -37,6 +37,88 @@ export function formatDateTime(date: string, timeZone: string) {
   return formatter.format(new Date(date));
 }
 
+/**
+ * Día calendario (YYYY-MM-DD) de un instante, en la zona del evento.
+ * Se usa `en-CA` porque su formato ordena alfabéticamente igual que
+ * cronológicamente, así los días se pueden comparar como strings.
+ */
+export function eventDay(iso: string, timeZone: string) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(new Date(iso));
+}
+
+/** Hora (0-23) de un instante, en la zona del evento. */
+export function eventHour(iso: string, timeZone: string) {
+  return Number(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone,
+      hour: "2-digit",
+      hour12: false,
+    }).format(new Date(iso)),
+  );
+}
+
+/**
+ * Etiqueta corta de un día ISO ("dom 5 abr").
+ *
+ * Formatea en UTC a propósito: `day` ya es una fecha de calendario resuelta en
+ * la zona del evento, así que volver a aplicarle una zona la correría de día.
+ */
+export function formatDayLabel(day: string) {
+  return new Intl.DateTimeFormat("es-AR", {
+    timeZone: "UTC",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${day}T00:00:00Z`));
+}
+
+/**
+ * Tiempo transcurrido en formato corto ("hace 2 min", "hace 3 d").
+ *
+ * Se calcula en el servidor al renderizar: es una foto del momento de la
+ * carga, no un contador vivo. Si se calculara en el cliente el texto no
+ * coincidiría con el del HTML del servidor (mismatch de hidratación).
+ */
+export function formatRelativeTime(date: string, now = Date.now()) {
+  const seconds = Math.round((now - new Date(date).getTime()) / 1000);
+
+  if (seconds < 60) return "recién";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `hace ${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `hace ${days} d`;
+  const months = Math.round(days / 30);
+  if (months < 12) return `hace ${months} meses`;
+  return `hace ${Math.round(months / 12)} años`;
+}
+
+type Schedule = { start_datetime: string; end_datetime: string };
+
+/**
+ * Rango total de un conjunto de horarios: del primer inicio al último fin.
+ * Null si el evento todavía no tiene horarios cargados.
+ */
+export function scheduleRange(schedules: Schedule[]) {
+  if (schedules.length === 0) return null;
+
+  return schedules.reduce(
+    (range, schedule) => ({
+      start:
+        schedule.start_datetime < range.start
+          ? schedule.start_datetime
+          : range.start,
+      end:
+        schedule.end_datetime > range.end ? schedule.end_datetime : range.end,
+    }),
+    {
+      start: schedules[0].start_datetime,
+      end: schedules[0].end_datetime,
+    },
+  );
+}
+
 type DateParts = { day: string; month: string; year: string };
 
 function toParts(date: string): DateParts {

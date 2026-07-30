@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import { DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { useSidebar } from "@/components/ui/sidebar";
 import { LogOut } from "lucide-react";
+import {
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { useSidebar } from "@/components/ui/sidebar";
 
 type UserDropdownMenuProps = Readonly<React.PropsWithChildren>;
 export function UserDropdownMenu({ children }: UserDropdownMenuProps) {
@@ -31,5 +37,5 @@ export function UserDropdownMenu({ children }: UserDropdownMenuProps) {
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </DropdownMenuContent>
-  )
+  );
 }
