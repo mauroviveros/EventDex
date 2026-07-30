@@ -8,6 +8,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type PaginationState,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -20,7 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUrlStateReader, useUrlStateWriter } from "@/hooks/use-url-state";
 import { DataTablePagination } from "./pagination";
+import { formatSort, parseSort } from "./sorting";
 import { type DataTableFilter, DataTableToolbar } from "./toolbar";
 
 type DataTableProps<TData, TValue> = Readonly<{
@@ -35,6 +38,11 @@ type DataTableProps<TData, TValue> = Readonly<{
   /** Mensaje cuando no hay datos (distinto de "no hay resultados del filtro"). */
   empty: string;
   pageSize?: number;
+  /**
+   * Prefijo con el que la vista se persiste en la URL (`spots.q`, `spots.sort`…).
+   * Sin prefijo, el estado no sobrevive a una recarga.
+   */
+  urlPrefix?: string;
 }>;
 
 /**
@@ -55,22 +63,61 @@ export function DataTable<TData, TValue>({
   filters,
   empty,
   pageSize = 10,
+  urlPrefix = "",
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const readParam = useUrlStateReader(urlPrefix);
+
+  // El estado inicial sale de la URL: se lee una sola vez (los cambios
+  // posteriores los escribe el efecto de abajo, sin navegar).
+  const [sorting, setSorting] = useState<SortingState>(() =>
+    parseSort(readParam("sort")),
+  );
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() => {
+    const initial: ColumnFiltersState = [];
+
+    if (searchColumn && readParam("q")) {
+      initial.push({ id: searchColumn, value: readParam("q") });
+    }
+    for (const filter of filters ?? []) {
+      const value = readParam(filter.column);
+      if (value) initial.push({ id: filter.column, value });
+    }
+
+    return initial;
+  });
+  const [pagination, setPagination] = useState<PaginationState>(() => ({
+    pageIndex: Math.max(0, Number(readParam("page") || 1) - 1),
+    pageSize,
+  }));
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters },
-    initialState: { pagination: { pageSize } },
+    state: { sorting, columnFilters, pagination },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     autoResetPageIndex: true,
+  });
+
+  const filterValue = (id: string) =>
+    (columnFilters.find((filter) => filter.id === id)?.value as string) ?? null;
+
+  useUrlStateWriter(urlPrefix, {
+    q: searchColumn ? filterValue(searchColumn) : null,
+    sort: formatSort(sorting),
+    // La página se guarda en base 1, como se muestra, y se omite en la primera.
+    page: pagination.pageIndex > 0 ? String(pagination.pageIndex + 1) : null,
+    ...Object.fromEntries(
+      (filters ?? []).map((filter) => [
+        filter.column,
+        filterValue(filter.column),
+      ]),
+    ),
   });
 
   if (data.length === 0) {

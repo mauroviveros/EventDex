@@ -41,6 +41,7 @@ export function ParticipantsTable({
       searchPlaceholder="Buscar por nombre o mail…"
       filters={[MEDALS_FILTER]}
       empty="Todavía nadie escaneó un stand de este evento."
+      urlPrefix="visitors"
     />
   );
 }

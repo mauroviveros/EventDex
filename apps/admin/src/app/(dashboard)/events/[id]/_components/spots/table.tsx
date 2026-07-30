@@ -27,6 +27,7 @@ export function SpotsTable({ eventId, spots }: SpotsTableProps) {
       searchPlaceholder="Buscar stand…"
       filters={[STATUS_FILTER]}
       empty="Este evento todavía no tiene stands cargados."
+      urlPrefix="spots"
     />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useUrlStateReader, useUrlStateWriter } from "@/hooks/use-url-state";
 import type { EventListItem, EventPhase } from "@/types";
 import { EVENT_PHASES } from "@/utils";
 import { EventCard } from "../card";
@@ -22,8 +23,15 @@ const haystack = (event: EventListItem) =>
 type EventsExplorerProps = Readonly<{ events: EventListItem[] }>;
 
 export function EventsExplorer({ events }: EventsExplorerProps) {
-  const [search, setSearch] = useState("");
-  const [phase, setPhase] = useState<EventPhase | null>(null);
+  const readParam = useUrlStateReader();
+
+  const [search, setSearch] = useState(() => readParam("q"));
+  const [phase, setPhase] = useState<EventPhase | null>(() => {
+    const value = readParam("phase") as EventPhase;
+    return EVENT_PHASES.includes(value) ? value : null;
+  });
+
+  useUrlStateWriter("", { q: search, phase });
 
   // Los contadores salen del total, no de lo filtrado: si dependieran del
   // filtro activo, todos los demás mostrarían cero.

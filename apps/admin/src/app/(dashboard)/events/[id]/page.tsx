@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildEventAnalytics } from "@/server/analytics";
 import { getOrganizationEvent } from "@/server/events";
 import { requireMembership } from "@/server/guard";
@@ -13,18 +12,14 @@ import { EventHeadline } from "./_components/headline";
 import { Overview } from "./_components/overview/overview";
 import { ParticipantsTable } from "./_components/participants/table";
 import { SpotsTable } from "./_components/spots/table";
+import { EventTabs } from "./_components/tabs";
 
-type EventDetailPageProps = Readonly<{
-  params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}>;
+type EventDetailPageProps = Readonly<{ params: Promise<{ id: string }> }>;
 export default async function EventDetailPage({
   params,
-  searchParams,
 }: EventDetailPageProps) {
   const { membership } = await requireMembership();
   const { id } = await params;
-  // const query = await searchParams;
   const event = await getOrganizationEvent(membership.organization.id, id);
   if (!event) notFound();
 
@@ -53,34 +48,20 @@ export default async function EventDetailPage({
           count={{ spots: spots.length, visitors: participants.length }}
         />
 
-        <Tabs defaultValue="overview">
-          <TabsList>
-            <TabsTrigger value="overview">Resumen</TabsTrigger>
-            <TabsTrigger value="spots">Stands</TabsTrigger>
-            <TabsTrigger value="participants">Visitantes</TabsTrigger>
-            <TabsTrigger value="analytics">Estadísticas</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <Overview overview={overview} />
-          </TabsContent>
-
-          <TabsContent value="spots">
-            <SpotsTable eventId={event.id} spots={spots} />
-          </TabsContent>
-
-          <TabsContent value="participants">
+        <EventTabs
+          overview={<Overview overview={overview} />}
+          spots={<SpotsTable eventId={event.id} spots={spots} />}
+          participants={
             <ParticipantsTable
               participants={participants}
               totalSpots={spots.length}
               timezone={event.timezone}
             />
-          </TabsContent>
-
-          <TabsContent value="analytics">
+          }
+          analytics={
             <Analytics analytics={analytics} totalSpots={spots.length} />
-          </TabsContent>
-        </Tabs>
+          }
+        />
       </main>
     </>
   );
