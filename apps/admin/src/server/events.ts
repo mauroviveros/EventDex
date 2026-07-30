@@ -1,11 +1,6 @@
 import { createServiceClient } from "@/libs/supabase/service";
-import { OrganizationEvent } from "@/types";
+import { EventDetail, OrganizationEvent } from "@/types";
 import { countBy } from "@/utils";
-
-// export type EventDetail = Tables<"events"> & {
-//   location: Tables<"event_locations"> | null;
-//   schedules: Tables<"event_schedules">[];
-// };
 
 // /** URL pública del evento (deploy de apps/event) si está configurada. */
 // export function eventSiteUrl(
@@ -18,34 +13,34 @@ import { countBy } from "@/utils";
 //   return typeof value === "string" && value.length > 0 ? value : null;
 // }
 
-// /**
-//  * Evento puntual de la organización, con ubicación y horarios ordenados.
-//  * Null si no existe, está soft-deleted o pertenece a otra organización — el
-//  * filtro por `organization_id` es la barrera de autorización (el service
-//  * client no pasa por RLS), así que siempre va junto al id.
-//  */
-// export async function getOrganizationEvent(
-//   organizationId: string,
-//   eventId: string,
-// ): Promise<EventDetail | null> {
-//   const service = createServiceClient();
-//   const { data } = await service
-//     .from("events")
-//     .select("*, location:event_locations(*), schedules:event_schedules(*)")
-//     .eq("id", eventId)
-//     .eq("organization_id", organizationId)
-//     .is("deleted_at", null)
-//     .maybeSingle();
+/**
+ * Evento puntual de la organización, con ubicación y horarios ordenados.
+ * Null si no existe, está soft-deleted o pertenece a otra organización — el
+ * filtro por `organization_id` es la barrera de autorización (el service
+ * client no pasa por RLS), así que siempre va junto al id.
+ */
+export async function getOrganizationEvent(
+  organizationId: string,
+  eventId: string,
+): Promise<EventDetail | null> {
+  const service = createServiceClient();
+  const { data } = await service
+    .from("events")
+    .select("*, location:event_locations(*), schedules:event_schedules(*)")
+    .eq("id", eventId)
+    .eq("organization_id", organizationId)
+    .is("deleted_at", null)
+    .maybeSingle();
 
-//   if (!data) return null;
+  if (!data) return null;
 
-//   return {
-//     ...data,
-//     schedules: data.schedules.toSorted((a, b) =>
-//       a.start_datetime.localeCompare(b.start_datetime),
-//     ),
-//   };
-// }
+  return {
+    ...data,
+    schedules: data.schedules.toSorted((a, b) =>
+      a.start_datetime.localeCompare(b.start_datetime),
+    ),
+  };
+}
 
 /**
  * Eventos de la organización con sus métricas básicas (spots, escaneos,

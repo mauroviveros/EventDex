@@ -1,15 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { UserMetadata } from "@/types";
-
-const initials = (name: string) => {
-  return name
-    .split(" ")
-    .map((word) => word[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
+import { initials } from "@/utils";
 
 type UserLabelProps = Readonly<{ metadata: UserMetadata }>;
 export function UserLabel({ metadata }: UserLabelProps) {

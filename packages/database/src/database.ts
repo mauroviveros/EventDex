@@ -105,6 +105,7 @@ export type Database = {
           id: string;
           location: string;
           name: string;
+          status: Database["public"]["Enums"]["SPOT_STATUS"];
           type: Database["public"]["Enums"]["SPOT_TYPE"] | null;
           updated_at: string | null;
         };
@@ -116,6 +117,7 @@ export type Database = {
           id?: string;
           location: string;
           name: string;
+          status?: Database["public"]["Enums"]["SPOT_STATUS"];
           type?: Database["public"]["Enums"]["SPOT_TYPE"] | null;
           updated_at?: string | null;
         };
@@ -127,6 +129,7 @@ export type Database = {
           id?: string;
           location?: string;
           name?: string;
+          status?: Database["public"]["Enums"]["SPOT_STATUS"];
           type?: Database["public"]["Enums"]["SPOT_TYPE"] | null;
           updated_at?: string | null;
         };
@@ -366,6 +369,7 @@ export type Database = {
     Enums: {
       event_status: "ACTIVE" | "INACTIVE";
       ORGANIZATION_MEMBER_ROLE: "ADMIN" | "STAFF" | "SPOT_OWNER";
+      SPOT_STATUS: "ACTIVE" | "INACTIVE";
       SPOT_TYPE: "LOCAL" | "ATTRACTION";
     };
     CompositeTypes: {
@@ -499,6 +503,7 @@ export const Constants = {
     Enums: {
       event_status: ["ACTIVE", "INACTIVE"],
       ORGANIZATION_MEMBER_ROLE: ["ADMIN", "STAFF", "SPOT_OWNER"],
+      SPOT_STATUS: ["ACTIVE", "INACTIVE"],
       SPOT_TYPE: ["LOCAL", "ATTRACTION"],
     },
   },

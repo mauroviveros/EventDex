@@ -18,9 +18,32 @@ export type OrganizationEvent = Pick<Tables<"events">, "id" | "title" | "edition
   count: { spots: number; scans: number; participants: number; };
 };
 
+/** Evento con su ubicación y horarios, para la vista de detalle. */
+export type EventDetail = Tables<"events"> & {
+  location: Tables<"event_locations"> | null;
+  schedules: Tables<"event_schedules">[];
+};
+
+/** Stand de un evento con su avatar resuelto y sus métricas. */
+export type EventSpot = Pick<Tables<"event_spots">, "id" | "name" | "type" | "status" | "avatar_path"> & {
+  avatarUrl: string;
+  count: { scans: number };
+};
+
 /** Usuario con metadatos de perfil. */
 export type UserMetadata = {
   name: string;
   email: string;
   avatar: string | null;
+};
+
+/**
+ * Visitante del evento: identidad + medallas conseguidas y último escaneo.
+ * La identidad sale de `auth.users` (ver `getEventParticipants`), no de la
+ * tabla `profiles`.
+ */
+export type EventParticipant = UserMetadata & {
+  id: string;
+  count: { scans: number };
+  lastScanAt: string;
 };
