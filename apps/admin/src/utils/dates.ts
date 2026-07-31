@@ -46,6 +46,54 @@ export function eventDay(iso: string, timeZone: string) {
   return new Intl.DateTimeFormat("en-CA", { timeZone }).format(new Date(iso));
 }
 
+/** Desfasaje (ms) de una zona respecto de UTC en un instante dado. */
+function zoneOffset(instant: number, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(instant);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value);
+
+  // `hour` puede venir como 24 en la medianoche de algunos locales.
+  const hour = get("hour") % 24;
+  const asUtc = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    hour,
+    get("minute"),
+    get("second"),
+  );
+
+  return asUtc - instant;
+}
+
+/**
+ * Convierte la hora de pared del evento (lo que escribe un input
+ * `datetime-local`, sin zona) al instante UTC que se guarda en la base.
+ *
+ * Se calcula el desfasaje dos veces porque la primera estimación puede caer en
+ * un tramo con otro desfasaje —el cambio de horario de verano—, y en ese caso
+ * la segunda corrige. Null si el valor no parsea.
+ */
+export function zonedToUtc(local: string, timeZone: string): string | null {
+  const asUtc = Date.parse(`${local}:00.000Z`);
+  if (Number.isNaN(asUtc)) return null;
+
+  const guess = asUtc - zoneOffset(asUtc, timeZone);
+  const instant = asUtc - zoneOffset(guess, timeZone);
+
+  return new Date(instant).toISOString();
+}
+
 /** Hora (0-23) de un instante, en la zona del evento. */
 export function eventHour(iso: string, timeZone: string) {
   return Number(

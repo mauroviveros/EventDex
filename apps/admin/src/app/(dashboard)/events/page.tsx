@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { getOrganizationEvents } from "@/server/events";
@@ -21,9 +22,11 @@ export default async function EventsPage() {
   return (
     <>
       <Header items={[{ label: "Eventos" }]}>
-        <Button size="sm">
-          <Plus />
-          Crear evento
+        <Button size="sm" asChild>
+          <Link href="/events/new">
+            <Plus />
+            Crear evento
+          </Link>
         </Button>
       </Header>
 

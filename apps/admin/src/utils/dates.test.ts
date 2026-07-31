@@ -1,5 +1,38 @@
 import { describe, expect, it } from "vitest";
-import { formatDateRange, formatRelativeTime, scheduleRange } from "./dates";
+import {
+  formatDateRange,
+  formatRelativeTime,
+  scheduleRange,
+  zonedToUtc,
+} from "./dates";
+
+describe("zonedToUtc", () => {
+  const tz = "America/Argentina/Buenos_Aires";
+
+  it("interpreta la hora de pared en la zona del evento", () => {
+    // Buenos Aires es UTC-3 todo el año: 13:00 local son las 16:00 UTC.
+    expect(zonedToUtc("2026-04-05T13:00", tz)).toBe("2026-04-05T16:00:00.000Z");
+  });
+
+  it("resuelve zonas con horario de verano a cada lado del cambio", () => {
+    // Madrid: UTC+1 en invierno y UTC+2 en verano.
+    expect(zonedToUtc("2026-01-15T12:00", "Europe/Madrid")).toBe(
+      "2026-01-15T11:00:00.000Z",
+    );
+    expect(zonedToUtc("2026-07-15T12:00", "Europe/Madrid")).toBe(
+      "2026-07-15T10:00:00.000Z",
+    );
+  });
+
+  it("es coherente con eventDay y eventHour", () => {
+    const utc = zonedToUtc("2026-04-05T23:30", tz);
+    expect(utc).toBe("2026-04-06T02:30:00.000Z");
+  });
+
+  it("devuelve null si el valor no parsea", () => {
+    expect(zonedToUtc("no-es-fecha", tz)).toBeNull();
+  });
+});
 
 describe("formatRelativeTime", () => {
   const now = new Date("2026-04-05T18:00:00Z").getTime();
