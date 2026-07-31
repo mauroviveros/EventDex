@@ -11,7 +11,11 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 /** Un tramo del breadcrumb; sin `href` es la página actual. */
-export type Crumb = { label: string; href?: string };
+/**
+ * `label` acepta nodos y no solo texto para que las pantallas de carga puedan
+ * poner un skeleton en lugar del título que todavía no se conoce.
+ */
+export type Crumb = { label: React.ReactNode; href?: string; key?: string };
 
 type HeaderProps = Readonly<{
   /** Tramos de la ruta, del más general al actual: [Eventos, Lo de Charly]. */
@@ -37,8 +41,8 @@ export function Header({ items, children }: HeaderProps) {
 
       <Breadcrumb>
         <BreadcrumbList className="flex-nowrap">
-          {parents.map((crumb) => (
-            <Fragment key={crumb.label}>
+          {parents.map((crumb, index) => (
+            <Fragment key={crumb.key ?? crumb.href ?? index}>
               <BreadcrumbItem className="hidden sm:flex">
                 {crumb.href ? (
                   <BreadcrumbLink href={crumb.href}>

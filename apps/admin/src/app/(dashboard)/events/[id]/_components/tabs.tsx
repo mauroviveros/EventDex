@@ -3,17 +3,23 @@
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const TABS = [
+export const TABS = [
   { value: "overview", label: "Resumen" },
   { value: "spots", label: "Stands" },
   { value: "participants", label: "Visitantes" },
   { value: "analytics", label: "Estadísticas" },
 ] as const;
 
-type TabValue = (typeof TABS)[number]["value"];
+export type TabValue = (typeof TABS)[number]["value"];
 
-const isTab = (value: string): value is TabValue =>
+export const isTab = (value: string): value is TabValue =>
   TABS.some((tab) => tab.value === value);
+
+/** Tab del hash actual; `overview` si no hay uno válido. */
+export const tabFromHash = (): TabValue => {
+  const hash = window.location.hash.slice(1);
+  return isTab(hash) ? hash : "overview";
+};
 
 type EventTabsProps = Readonly<Record<TabValue, React.ReactNode>>;
 
@@ -32,10 +38,7 @@ export function EventTabs(slots: EventTabsProps) {
   const [tab, setTab] = useState<TabValue>("overview");
 
   useEffect(() => {
-    const sync = () => {
-      const hash = window.location.hash.slice(1);
-      if (isTab(hash)) setTab(hash);
-    };
+    const sync = () => setTab(tabFromHash());
 
     sync();
     window.addEventListener("hashchange", sync);
