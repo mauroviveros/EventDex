@@ -1,6 +1,7 @@
 import { Header } from "@/components/header";
 import { requireMembership } from "@/server/guard";
-import { NewEventForm } from "./_components/form";
+import { EventForm } from "../_components/event-form";
+import { createEvent } from "../actions";
 
 export default async function NewEventPage() {
   // No usa los datos, pero el guard tiene que correr igual: sin membresía no
@@ -27,7 +28,11 @@ export default async function NewEventPage() {
           </p>
         </div>
 
-        <NewEventForm />
+        <EventForm
+          action={createEvent}
+          submitLabel="Crear evento"
+          cancelHref="/events"
+        />
       </main>
     </>
   );

@@ -1,6 +1,6 @@
 import { Header } from "@/components/header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NewEventSkeleton } from "./_components/skeleton";
+import { EventFormSkeleton } from "../_components/form-skeleton";
 
 /**
  * El breadcrumb de esta ruta es fijo, así que se renderiza real: solo el
@@ -22,7 +22,7 @@ export default function NewEventLoading() {
           <Skeleton className="h-4 w-96 max-w-full" />
         </div>
 
-        <NewEventSkeleton />
+        <EventFormSkeleton />
       </main>
     </>
   );

@@ -3,11 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createServiceClient } from "@/libs/supabase/service";
-import { type EventFormErrors, parseEventForm } from "@/server/event-form";
+import { type EventFormState, parseEventForm } from "@/server/event-form";
 import { requireMembership } from "@/server/guard";
 import { zonedToUtc } from "@/utils";
-
-export type EventFormState = { errors: EventFormErrors } | null;
 
 /**
  * Crea un evento con su ubicación y su primera jornada.

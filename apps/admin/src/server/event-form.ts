@@ -26,6 +26,9 @@ export type EventFormValues = {
 /** Errores por campo; `_form` es el que no pertenece a ninguno. */
 export type EventFormErrors = Record<string, string>;
 
+/** Lo que devuelven las actions del formulario a `useActionState`. */
+export type EventFormState = { errors: EventFormErrors } | null;
+
 const text = (formData: FormData, name: string) => {
   const value = formData.get(name);
   return typeof value === "string" ? value.trim() : "";

@@ -7,7 +7,9 @@ import { buildEventOverview } from "@/server/overview";
 import { getEventParticipants } from "@/server/participants";
 import { getEventScans } from "@/server/scans";
 import { getEventSpots } from "@/server/spots";
+import { eventPhase } from "@/utils";
 import { Analytics } from "./_components/analytics/analytics";
+import { EventActions } from "./_components/event-actions";
 import { EventHeadline } from "./_components/headline";
 import { Overview } from "./_components/overview/overview";
 import { ParticipantsTable } from "./_components/participants/table";
@@ -40,7 +42,13 @@ export default async function EventDetailPage({
     <>
       <Header
         items={[{ label: "Eventos", href: "/events" }, { label: event.title }]}
-      />
+      >
+        <EventActions
+          eventId={event.id}
+          title={event.title}
+          phase={eventPhase(event)}
+        />
+      </Header>
 
       <main className="flex flex-col gap-6 p-4">
         <EventHeadline

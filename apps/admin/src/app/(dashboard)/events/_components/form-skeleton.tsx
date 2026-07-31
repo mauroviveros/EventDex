@@ -11,8 +11,8 @@ function FieldSkeleton({ input = "h-9" }: Readonly<{ input?: string }>) {
   );
 }
 
-/** Espeja el formulario de alta: dos columnas arriba y las jornadas abajo. */
-export function NewEventSkeleton() {
+/** Espeja el formulario de evento: dos columnas arriba y las jornadas abajo. */
+export function EventFormSkeleton() {
   return (
     <div className="flex max-w-6xl flex-col gap-4">
       <Skeleton className="h-4 w-64" />

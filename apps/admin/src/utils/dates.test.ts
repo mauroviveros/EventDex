@@ -3,6 +3,7 @@ import {
   formatDateRange,
   formatRelativeTime,
   scheduleRange,
+  utcToZoned,
   zonedToUtc,
 } from "./dates";
 
@@ -31,6 +32,32 @@ describe("zonedToUtc", () => {
 
   it("devuelve null si el valor no parsea", () => {
     expect(zonedToUtc("no-es-fecha", tz)).toBeNull();
+  });
+});
+
+describe("utcToZoned", () => {
+  const tz = "America/Argentina/Buenos_Aires";
+
+  it("devuelve el formato que espera un input datetime-local", () => {
+    expect(utcToZoned("2026-04-05T16:00:00.000Z", tz)).toBe("2026-04-05T13:00");
+  });
+
+  it("usa reloj de 24 horas también a la medianoche", () => {
+    // 03:00 UTC son las 00:00 en Buenos Aires: no puede salir "24:00".
+    expect(utcToZoned("2026-04-06T03:00:00.000Z", tz)).toBe("2026-04-06T00:00");
+  });
+
+  it("es inversa de zonedToUtc, incluso cruzando el día", () => {
+    for (const local of ["2026-04-05T13:00", "2026-04-05T23:30"]) {
+      const utc = zonedToUtc(local, tz);
+      expect(utc && utcToZoned(utc, tz)).toBe(local);
+    }
+  });
+
+  it("respeta el horario de verano de la zona", () => {
+    expect(utcToZoned("2026-07-15T10:00:00.000Z", "Europe/Madrid")).toBe(
+      "2026-07-15T12:00",
+    );
   });
 });
 

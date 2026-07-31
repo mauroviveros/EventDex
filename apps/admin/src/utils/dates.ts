@@ -94,6 +94,28 @@ export function zonedToUtc(local: string, timeZone: string): string | null {
   return new Date(instant).toISOString();
 }
 
+/**
+ * Inversa de `zonedToUtc`: pasa un instante guardado en UTC al formato que
+ * espera un input `datetime-local` (`YYYY-MM-DDTHH:mm`), en la zona del evento.
+ * Es lo que precarga el formulario de edición.
+ */
+export function utcToZoned(iso: string, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(new Date(iso));
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
 /** Hora (0-23) de un instante, en la zona del evento. */
 export function eventHour(iso: string, timeZone: string) {
   return Number(
