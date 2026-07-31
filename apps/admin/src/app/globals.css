@@ -2,7 +2,23 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * Dark mode por preferencia del sistema, forzable con las clases `.dark` y
+ * `.light` en el <html>. Se declara en forma de bloque (y no como el
+ * `&:is(.dark *)` que genera shadcn) para que las utilidades `dark:` se
+ * activen también por media query: sin esto, el dark mode queda definido pero
+ * inalcanzable, porque nada agrega la clase.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:not(:is(.light, .light *)) {
+      @slot;
+    }
+  }
+  &:is(.dark, .dark *) {
+    @slot;
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -45,76 +61,148 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Paleta violeta del dashboard, convertida a oklch (el HSL original queda al
+ * lado como referencia). La clara toma el tema "dashboard" y la oscura su
+ * contraparte; el primario es el mismo violeta en ambas, que es lo que le da
+ * identidad a la app.
+ */
 :root {
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --background: oklch(0.9679 0.0027 264.54); /* hsl(220 14% 96%) */
+  --foreground: oklch(0.246 0.0208 269.23); /* hsl(224 20% 14%) */
+  --card: oklch(1 0 0); /* hsl(0 0% 100%) */
+  --card-foreground: oklch(0.246 0.0208 269.23);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.246 0.0208 269.23);
+  --primary: oklch(0.6018 0.2095 287.57); /* hsl(252 87% 67%) */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.9356 0.0055 264.53); /* hsl(220 14% 92%) */
+  --secondary-foreground: oklch(0.246 0.0208 269.23);
+  --muted: oklch(0.9518 0.0041 264.54); /* hsl(220 14% 94%) */
+  --muted-foreground: oklch(0.5489 0.0261 264.33); /* hsl(220 10% 46%) */
+  --accent: oklch(0.9385 0.0301 294.99); /* hsl(252 87% 95%) */
+  --accent-foreground: oklch(0.3892 0.2365 274.79); /* hsl(252 87% 40%) */
+  --destructive: oklch(0.6368 0.2078 25.33); /* hsl(0 84.2% 60.2%) */
+  --border: oklch(0.9194 0.0069 264.53); /* hsl(220 14% 90%) */
+  --input: oklch(0.9194 0.0069 264.53);
+  --ring: oklch(0.6018 0.2095 287.57);
+  --radius: 0.5rem;
+
+  --sidebar: oklch(1 0 0); /* hsl(0 0% 100%) */
+  --sidebar-foreground: oklch(0.246 0.0208 269.23);
+  --sidebar-primary: oklch(0.6018 0.2095 287.57);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.9385 0.0301 294.99);
+  --sidebar-accent-foreground: oklch(0.3892 0.2365 274.79);
+  --sidebar-border: oklch(0.9356 0.0055 264.53);
+  --sidebar-ring: oklch(0.6018 0.2095 287.57);
+
+  /*
+   * Los gráficos no venían en la paleta: la rampa se deriva del gradiente del
+   * tema (violeta → cian) para que las series se lean como parte del sistema.
+   * En claro van más oscuras, para contrastar sobre el fondo.
+   */
+  --chart-1: oklch(0.5278 0.2157 285.51); /* hsl(252 70% 58%) */
+  --chart-2: oklch(0.5358 0.2056 266.4); /* hsl(226 75% 55%) */
+  --chart-3: oklch(0.6013 0.1319 239.08); /* hsl(200 85% 42%) */
+  --chart-4: oklch(0.5939 0.1958 309.34); /* hsl(276 60% 58%) */
+  --chart-5: oklch(0.6248 0.1006 184.95); /* hsl(174 60% 38%) */
+}
+
+/*
+ * La paleta oscura se repite en dos selectores —media query y clase— porque
+ * CSS no permite combinarlos en una sola regla. Si se toca un valor, va en
+ * los dos lados.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: oklch(0.175 0.009 274.34); /* hsl(228 15% 7%) */
+    --foreground: oklch(0.9676 0.007 247.9); /* hsl(210 40% 96%) */
+    --card: oklch(0.2067 0.0124 274.22); /* hsl(228 15% 10%) */
+    --card-foreground: oklch(0.9676 0.007 247.9);
+    --popover: oklch(0.2067 0.0124 274.22);
+    --popover-foreground: oklch(0.9676 0.007 247.9);
+    --primary: oklch(0.6018 0.2095 287.57); /* hsl(252 87% 67%) */
+    --primary-foreground: oklch(0.175 0.009 274.34);
+    --secondary: oklch(0.2694 0.0148 274.29); /* hsl(228 12% 16%) */
+    --secondary-foreground: oklch(0.9676 0.007 247.9);
+    --muted: oklch(0.2694 0.0148 274.29);
+    --muted-foreground: oklch(0.6268 0.0347 256.8); /* hsl(215 15% 55%) */
+    --accent: oklch(0.6018 0.2095 287.57);
+    --accent-foreground: oklch(0.175 0.009 274.34);
+    --destructive: oklch(0.5623 0.1966 26.28); /* hsl(0 62.8% 50%) */
+    --border: oklch(0.2889 0.0164 274.27); /* hsl(228 12% 18%) */
+    --input: oklch(0.2889 0.0164 274.27);
+    --ring: oklch(0.6018 0.2095 287.57);
+
+    --sidebar: oklch(0.1962 0.0113 274.25); /* hsl(228 15% 9%) */
+    --sidebar-foreground: oklch(0.9676 0.007 247.9);
+    --sidebar-primary: oklch(0.6018 0.2095 287.57);
+    --sidebar-primary-foreground: oklch(0.175 0.009 274.34);
+    --sidebar-accent: oklch(0.2495 0.0132 274.32); /* hsl(228 12% 14%) */
+    --sidebar-accent-foreground: oklch(0.9676 0.007 247.9);
+    --sidebar-border: oklch(0.2694 0.0148 274.29);
+    --sidebar-ring: oklch(0.6018 0.2095 287.57);
+
+    --chart-1: oklch(0.6018 0.2095 287.57); /* hsl(252 87% 67%) */
+    --chart-2: oklch(0.6099 0.1943 267.57); /* hsl(226 90% 64%) */
+    --chart-3: oklch(0.746 0.1427 235.74); /* hsl(200 95% 60%) */
+    --chart-4: oklch(0.6941 0.1746 310.29); /* hsl(276 75% 70%) */
+    --chart-5: oklch(0.7977 0.1354 184.12); /* hsl(174 70% 50%) */
+  }
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.175 0.009 274.34); /* hsl(228 15% 7%) */
+  --foreground: oklch(0.9676 0.007 247.9); /* hsl(210 40% 96%) */
+  --card: oklch(0.2067 0.0124 274.22); /* hsl(228 15% 10%) */
+  --card-foreground: oklch(0.9676 0.007 247.9);
+  --popover: oklch(0.2067 0.0124 274.22);
+  --popover-foreground: oklch(0.9676 0.007 247.9);
+  --primary: oklch(0.6018 0.2095 287.57); /* hsl(252 87% 67%) */
+  --primary-foreground: oklch(0.175 0.009 274.34);
+  --secondary: oklch(0.2694 0.0148 274.29); /* hsl(228 12% 16%) */
+  --secondary-foreground: oklch(0.9676 0.007 247.9);
+  --muted: oklch(0.2694 0.0148 274.29);
+  --muted-foreground: oklch(0.6268 0.0347 256.8); /* hsl(215 15% 55%) */
+  --accent: oklch(0.6018 0.2095 287.57);
+  --accent-foreground: oklch(0.175 0.009 274.34);
+  --destructive: oklch(0.5623 0.1966 26.28); /* hsl(0 62.8% 50%) */
+  --border: oklch(0.2889 0.0164 274.27); /* hsl(228 12% 18%) */
+  --input: oklch(0.2889 0.0164 274.27);
+  --ring: oklch(0.6018 0.2095 287.57);
+
+  --sidebar: oklch(0.1962 0.0113 274.25); /* hsl(228 15% 9%) */
+  --sidebar-foreground: oklch(0.9676 0.007 247.9);
+  --sidebar-primary: oklch(0.6018 0.2095 287.57);
+  --sidebar-primary-foreground: oklch(0.175 0.009 274.34);
+  --sidebar-accent: oklch(0.2495 0.0132 274.32); /* hsl(228 12% 14%) */
+  --sidebar-accent-foreground: oklch(0.9676 0.007 247.9);
+  --sidebar-border: oklch(0.2694 0.0148 274.29);
+  --sidebar-ring: oklch(0.6018 0.2095 287.57);
+
+  --chart-1: oklch(0.6018 0.2095 287.57); /* hsl(252 87% 67%) */
+  --chart-2: oklch(0.6099 0.1943 267.57); /* hsl(226 90% 64%) */
+  --chart-3: oklch(0.746 0.1427 235.74); /* hsl(200 95% 60%) */
+  --chart-4: oklch(0.6941 0.1746 310.29); /* hsl(276 75% 70%) */
+  --chart-5: oklch(0.7977 0.1354 184.12); /* hsl(174 70% 50%) */
 }
 
 @layer base {
+  /*
+   * Alinea lo que pinta el navegador (scrollbars, controles nativos) con el
+   * tema activo. `light dark` deja que siga la preferencia del sistema.
+   */
+  :root {
+    color-scheme: light dark;
+  }
+  .light {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
