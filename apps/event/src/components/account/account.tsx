@@ -4,6 +4,7 @@ import { Loader } from "@nsmr/pixelart-react";
 import type { User } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/libs/supabase/client";
+import { ORGANIZER_ROLES } from "@/utils";
 import Profile from "./profile";
 import SignIn from "./signin";
 
@@ -29,8 +30,12 @@ export default function Account() {
   }, [supabase]);
 
   // El rol de admin se resuelve en el cliente (antes lo pasaba el Header server).
-  // Es solo para mostrar/ocultar el acceso al sorteo; la ruta /raffle igual está
-  // protegida server-side. RLS permite al usuario leer su propia membresía.
+  // Es solo para mostrar/ocultar los accesos de organizador; /raffle y el
+  // dashboard igual están protegidos server-side. RLS permite al usuario leer su
+  // propia membresía.
+  //
+  // El filtro por rol es el mismo que `isOrganizer()`: sin él, un SPOT_OWNER
+  // vería en el menú accesos que después le rebotan.
   useEffect(() => {
     if (!user) {
       setIsAdmin(false);
@@ -42,6 +47,8 @@ export default function Account() {
       .from("organization_members")
       .select("id")
       .eq("user_id", user.id)
+      .in("role", ORGANIZER_ROLES)
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => {
         if (active) setIsAdmin(Boolean(data));

@@ -2,6 +2,7 @@
 
 import {
   ChevronDown,
+  Dashboard,
   Logout,
   Trophy,
   User as UserIcon,
@@ -19,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { env } from "@/config/env";
 import { createClient } from "@/libs/supabase/client";
 
 export default function Profile({
@@ -83,6 +85,17 @@ export default function Profile({
                 Sorteo
               </Link>
             </DropdownMenuItem>
+
+            {/* Enlace externo: el dashboard es otra app, así que va con <a> y
+                no con <Link> (no hay prefetch ni navegación cliente posible). */}
+            {env.DASHBOARD_URL && (
+              <DropdownMenuItem className="text-lg" asChild>
+                <a href={env.DASHBOARD_URL}>
+                  <Dashboard className="size-5" />
+                  Dashboard
+                </a>
+              </DropdownMenuItem>
+            )}
           </>
         )}
 

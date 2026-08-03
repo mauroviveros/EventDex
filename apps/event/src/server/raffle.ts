@@ -1,7 +1,7 @@
-import { serverEnv } from "@/config/env.server";
 import { createServiceClient } from "@/libs/supabase/service";
 import type { RaffleParticipant } from "@/types";
 import { getOrganizerUserIds } from "./auth";
+import { getActiveEventId } from "./events";
 
 type ServiceClient = ReturnType<typeof createServiceClient>;
 
@@ -32,13 +32,16 @@ async function buildParticipant(
  * de RLS) y resuelve sus perfiles vía la Admin API.
  */
 export async function getRaffleParticipants(): Promise<RaffleParticipant[]> {
+  const eventId = await getActiveEventId();
+  if (!eventId) return [];
+
   const service = createServiceClient();
 
   // 1. Spots que pertenecen al evento actual.
   const { data: eventSpots } = await service
     .from("event_spots")
     .select("id")
-    .eq("event_id", serverEnv.EVENTDEX_EVENT_ID)
+    .eq("event_id", eventId)
     .is("deleted_at", null);
 
   const spotIds = (eventSpots ?? []).map((spot) => spot.id);
@@ -74,11 +77,14 @@ export async function getRaffleParticipants(): Promise<RaffleParticipant[]> {
  * todavía no se sorteó. La tabla es append-only, así que "el actual" es el último.
  */
 export async function getRaffleWinner(): Promise<RaffleParticipant | null> {
+  const eventId = await getActiveEventId();
+  if (!eventId) return null;
+
   const service = createServiceClient();
   const { data } = await service
     .from("raffle_winners")
     .select("user_id, spot_count")
-    .eq("event_id", serverEnv.EVENTDEX_EVENT_ID)
+    .eq("event_id", eventId)
     .order("drawn_at", { ascending: false })
     .limit(1)
     .maybeSingle();

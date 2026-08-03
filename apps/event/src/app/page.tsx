@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getEvent } from "@/server/events";
+import { Card, CardContent } from "@/components/ui/card";
+import { getActiveEvent } from "@/server/events";
 import type { Event } from "@/types";
 import { resolveScheduleDateTime } from "@/utils";
 import Upcoming from "./_components/upcoming";
@@ -7,10 +8,16 @@ import Upcoming from "./_components/upcoming";
 // La landing se genera estáticamente y se revalida cada hora (ISR): sus datos
 // (evento, ubicación, horario) cambian rara vez, y la cuenta regresiva es
 // client-side, así que se sirve desde CDN sin sacrificar frescura.
+//
+// El evento que se muestra ahora se elige por fecha, así que la revalidación es
+// también lo que hace que la landing pase sola al evento siguiente: como mucho
+// tarda una hora en enterarse.
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const event = await getEvent();
+  const event = await getActiveEvent();
+  if (!event) return { title: "Lo de Charly TCG" };
+
   const title = `${event.title} | Lo de Charly TCG`;
   const description = event.description ?? undefined;
   const images = ["/logo.png"];
@@ -65,8 +72,27 @@ function eventJsonLd(event: Event) {
   };
 }
 
+/** Sin eventos publicados no hay nada que contar, pero la landing sigue viva. */
+function NoEvent() {
+  return (
+    <section className="flex-1 flex flex-col items-center justify-center px-2 py-8 min-h-[calc(100dvh-5rem)]">
+      <Card className="highlight mx-4">
+        <CardContent className="font-press-start text-center space-y-2 px-2">
+          <h1 className="text-2xl text-secondary text-balance">
+            No hay eventos por ahora
+          </h1>
+          <p className="text-xs text-muted-foreground text-pretty">
+            Volvé pronto: en cuanto anunciemos el próximo, aparece acá.
+          </p>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
 export default async function Home() {
-  const event = await getEvent();
+  const event = await getActiveEvent();
+  if (!event) return <NoEvent />;
 
   return (
     <>

@@ -26,4 +26,12 @@ export const env = {
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     );
   },
+  /**
+   * URL del dashboard de organizadores. Opcional a propósito: si no está
+   * configurada el menú simplemente no ofrece el acceso, en vez de romper la
+   * app pública por una variable que solo le sirve a un puñado de usuarios.
+   */
+  get DASHBOARD_URL(): string | null {
+    return process.env.NEXT_PUBLIC_DASHBOARD_URL || null;
+  },
 };

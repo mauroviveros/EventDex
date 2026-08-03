@@ -15,13 +15,15 @@ export const serverEnv = {
       process.env.SUPABASE_SERVICE_ROLE_KEY,
     );
   },
+  /**
+   * Organización dueña del sitio. Es toda la configuración de contenido que
+   * necesita el deployment: qué evento mostrar lo decide `getActiveEvent()`
+   * según el calendario, no una variable de entorno.
+   */
   get EVENTDEX_ORGANIZATION_ID() {
     return required(
       "EVENTDEX_ORGANIZATION_ID",
       process.env.EVENTDEX_ORGANIZATION_ID,
     );
-  },
-  get EVENTDEX_EVENT_ID() {
-    return required("EVENTDEX_EVENT_ID", process.env.EVENTDEX_EVENT_ID);
   },
 };
