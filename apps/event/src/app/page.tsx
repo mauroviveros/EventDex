@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import { getActiveEvent } from "@/server/events";
+import { getOrganization } from "@/server/organization";
 import type { Event } from "@/types";
 import { resolveScheduleDateTime } from "@/utils";
 import Upcoming from "./_components/upcoming";
@@ -14,16 +15,23 @@ import Upcoming from "./_components/upcoming";
 // tarda una hora en enterarse.
 export const revalidate = 3600;
 
+/**
+ * La landing no define `title`: hereda el del layout, que ya es
+ * `<evento> | <organización> | Eventdex`. Solo agrega lo suyo —canonical, OG y
+ * Twitter—, con el título completo porque las tarjetas sociales se comparten
+ * fuera del sitio y ahí el contexto lo tiene que dar el texto.
+ */
 export async function generateMetadata(): Promise<Metadata> {
-  const event = await getActiveEvent();
-  if (!event) return { title: "Lo de Charly TCG" };
+  const [event, organization] = await Promise.all([
+    getActiveEvent(),
+    getOrganization(),
+  ]);
 
-  const title = `${event.title} | Lo de Charly TCG`;
-  const description = event.description ?? undefined;
+  const title = [event?.title, organization?.name].filter(Boolean).join(" | ");
+  const description = event?.description ?? undefined;
   const images = ["/logo.png"];
 
   return {
-    title,
     description,
     alternates: { canonical: "/" },
     openGraph: {
