@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@eventdex/database": "workspace:*",
-    "@supabase/ssr": "^0.12.3",
-    "@supabase/supabase-js": "^2.110.2"
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.110.9"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
