@@ -1,13 +1,19 @@
 import { serverEnv } from "@/config/env.server";
 import { createClient } from "@/libs/supabase/server";
 
-/** Todos los spots del evento actual, con la URL pública de su avatar resuelta. */
+/**
+ * Todos los spots vivos del evento actual, con la URL pública de su avatar
+ * resuelta. Un spot dado de baja desde el dashboard (`deleted_at`) desaparece
+ * de la colección: su fila sigue existiendo solo para no romper el historial
+ * de quienes ya lo escanearon.
+ */
 export async function getEventSpots() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("event_spots")
     .select("*, event:event_id(*)")
-    .eq("event_id", serverEnv.EVENTDEX_EVENT_ID);
+    .eq("event_id", serverEnv.EVENTDEX_EVENT_ID)
+    .is("deleted_at", null);
 
   return (data ?? []).map((spot) => ({
     ...spot,
@@ -16,7 +22,11 @@ export async function getEventSpots() {
   }));
 }
 
-/** Spot puntual del evento actual (null si no existe o no pertenece al evento). */
+/**
+ * Spot puntual del evento actual (null si no existe, está dado de baja o no
+ * pertenece al evento). Un QR impreso de un spot borrado deja de entregar
+ * medalla y cae en el mismo 404 que un id inventado.
+ */
 export async function getEventSpot(id: string) {
   const supabase = await createClient();
   const { data: spot } = await supabase
@@ -24,6 +34,7 @@ export async function getEventSpot(id: string) {
     .select("*, event:event_id(*)")
     .eq("id", id)
     .eq("event.id", serverEnv.EVENTDEX_EVENT_ID)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (!spot) return null;

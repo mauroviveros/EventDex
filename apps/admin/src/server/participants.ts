@@ -73,10 +73,14 @@ export async function getEventParticipants(
 ): Promise<EventParticipant[]> {
   const service = createServiceClient();
 
+  // Los stands dados de baja no cuentan, igual que en `getEventSpots`: si no
+  // aparecen en la tabla de stands, sus escaneos tampoco deben inflar las
+  // medallas de los visitantes.
   const { data: spots, error: spotsError } = await service
     .from("event_spots")
     .select("id")
-    .eq("event_id", eventId);
+    .eq("event_id", eventId)
+    .is("deleted_at", null);
 
   if (spotsError) throw spotsError;
   if (!spots || spots.length === 0) return [];

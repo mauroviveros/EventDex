@@ -4,25 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createServiceClient } from "@/libs/supabase/service";
 import { type EventFormState, parseEventForm } from "@/server/event-form";
-import { getOrganizationEvent } from "@/server/events";
-import { requireMembership } from "@/server/guard";
-import type { Enums } from "@/types";
-import { eventPhase, zonedToUtc } from "@/utils";
-
-/**
- * Un evento finalizado es historia: sus datos quedan como respaldo de los
- * escaneos que ya ocurrieron. El bloqueo se repite acá y no solo en la
- * interfaz, porque la interfaz se puede saltear.
- */
-async function requireEditableEvent(eventId: string) {
-  const { membership } = await requireMembership();
-  const event = await getOrganizationEvent(membership.organization.id, eventId);
-
-  if (!event) redirect("/events");
-  if (eventPhase(event) === "FINISHED") redirect(`/events/${eventId}`);
-
-  return { event, service: createServiceClient() };
-}
+import { requireEditableEvent, requireMembership } from "@/server/guard";
+import { zonedToUtc } from "@/utils";
 
 /** Guarda los cambios del evento, su ubicación y sus jornadas. */
 export async function updateEvent(
@@ -127,38 +110,4 @@ export async function deleteEvent(eventId: string) {
 
   revalidatePath("/events");
   redirect("/events");
-}
-
-/**
- * Activa o desactiva un stand.
- *
- * El `spotId` llega del cliente y el service client no pasa por RLS, así que
- * la comprobación de que el spot cuelga de un evento de la organización del
- * usuario es la única barrera de autorización: sin ella, cualquier sesión
- * válida podría togglear stands ajenos.
- */
-export async function setSpotStatus(
-  eventId: string,
-  spotId: string,
-  status: Enums<"SPOT_STATUS">,
-) {
-  const { membership } = await requireMembership();
-  const service = createServiceClient();
-
-  const { data: spot } = await service
-    .from("event_spots")
-    .select("id, event:event_id!inner(organization_id)")
-    .eq("id", spotId)
-    .eq("event_id", eventId)
-    .eq("event.organization_id", membership.organization.id)
-    .maybeSingle();
-
-  if (!spot) return;
-
-  await service
-    .from("event_spots")
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", spotId);
-
-  revalidatePath(`/events/${eventId}`);
 }

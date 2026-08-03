@@ -38,7 +38,8 @@ export async function getRaffleParticipants(): Promise<RaffleParticipant[]> {
   const { data: eventSpots } = await service
     .from("event_spots")
     .select("id")
-    .eq("event_id", serverEnv.EVENTDEX_EVENT_ID);
+    .eq("event_id", serverEnv.EVENTDEX_EVENT_ID)
+    .is("deleted_at", null);
 
   const spotIds = (eventSpots ?? []).map((spot) => spot.id);
   if (spotIds.length === 0) return [];

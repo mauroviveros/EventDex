@@ -38,16 +38,14 @@ export default async function EventDetailPage({
   const overview = buildEventOverview(derived);
   const analytics = buildEventAnalytics(derived);
 
+  const phase = eventPhase(event);
+
   return (
     <>
       <Header
         items={[{ label: "Eventos", href: "/events" }, { label: event.title }]}
       >
-        <EventActions
-          eventId={event.id}
-          title={event.title}
-          phase={eventPhase(event)}
-        />
+        <EventActions eventId={event.id} title={event.title} phase={phase} />
       </Header>
 
       <main className="flex flex-col gap-6 p-4">
@@ -58,7 +56,13 @@ export default async function EventDetailPage({
 
         <EventTabs
           overview={<Overview overview={overview} />}
-          spots={<SpotsTable eventId={event.id} spots={spots} />}
+          spots={
+            <SpotsTable
+              eventId={event.id}
+              spots={spots}
+              editable={phase !== "FINISHED"}
+            />
+          }
           participants={
             <ParticipantsTable
               participants={participants}

@@ -65,6 +65,9 @@ export async function getOrganizationEvents(
         `)
     .eq("organization_id", organizationId)
     .is("deleted_at", null)
+    // El filtro con prefijo aplica al recurso embebido: descarta los stands
+    // dados de baja del conteo sin descartar el evento que los contiene.
+    .is("spots.deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (!events || events.length === 0) return [];

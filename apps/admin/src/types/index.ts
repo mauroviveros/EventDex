@@ -51,6 +51,12 @@ export type EventSpot = Pick<
   count: { scans: number };
 };
 
+/** Stand completo, para precargar el formulario de edición. */
+export type EventSpotDetail = Pick<
+  Tables<"event_spots">,
+  "id" | "name" | "description" | "location" | "type" | "status" | "avatar_path"
+> & { avatarUrl: string };
+
 /** Escaneo crudo: la fila de `user_spot_history` tal como se lee. */
 export type EventScan = Pick<
   Tables<"user_spot_history">,

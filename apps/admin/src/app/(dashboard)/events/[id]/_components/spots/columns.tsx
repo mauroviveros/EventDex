@@ -13,8 +13,15 @@ const TYPES: Record<string, string> = {
   ATTRACTION: "Atracción",
 };
 
-/** Columnas de la tabla de stands; el eventId lo necesita el toggle de estado. */
-export function spotColumns(eventId: string): ColumnDef<EventSpot>[] {
+/**
+ * Columnas de la tabla de stands. El eventId lo necesitan el toggle de estado
+ * y los links de la fila; `editable` es false en un evento finalizado, donde
+ * los stands solo se miran.
+ */
+export function spotColumns(
+  eventId: string,
+  editable: boolean,
+): ColumnDef<EventSpot>[] {
   return [
     {
       accessorKey: "name",
@@ -65,13 +72,22 @@ export function spotColumns(eventId: string): ColumnDef<EventSpot>[] {
           eventId={eventId}
           spotId={row.original.id}
           status={row.original.status}
+          editable={editable}
         />
       ),
     },
     {
       id: "actions",
       header: () => <span className="sr-only">Acciones</span>,
-      cell: () => <SpotActionsCell />,
+      cell: ({ row }) => (
+        <SpotActionsCell
+          eventId={eventId}
+          spotId={row.original.id}
+          name={row.original.name}
+          scans={row.original.count.scans}
+          editable={editable}
+        />
+      ),
     },
   ];
 }
