@@ -1,6 +1,7 @@
 "use client";
 
 import { LogOut } from "lucide-react";
+import { signOut } from "@/app/login/actions";
 import {
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -31,10 +32,16 @@ export function UserDropdownMenu({ children }: UserDropdownMenuProps) {
       <DropdownMenuSeparator />
 
       <DropdownMenuGroup>
-        <DropdownMenuItem variant="destructive">
-          <LogOut />
-          Cerrar sesión
-        </DropdownMenuItem>
+        {/* Un form con la action: cerrar sesión escribe cookies, así que tiene
+            que ser un POST y no un handler de click. */}
+        <form action={signOut}>
+          <DropdownMenuItem variant="destructive" asChild>
+            <button type="submit" className="w-full">
+              <LogOut />
+              Cerrar sesión
+            </button>
+          </DropdownMenuItem>
+        </form>
       </DropdownMenuGroup>
     </DropdownMenuContent>
   );

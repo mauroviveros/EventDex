@@ -5,12 +5,21 @@ import type { Enums, Tables } from "@eventdex/database";
 export * from "@eventdex/database";
 
 /**
- * Membresía del usuario en una organización, o null si no es organizador.
- * `domain` es el host donde está publicada la app del evento: de ahí salen los
- * links que se imprimen en los QR de los stands.
+ * Roles con acceso al dashboard. `SPOT_OWNER` queda afuera: administra su
+ * propio stand, no el evento (su pantalla es otra y todavía no existe).
+ */
+export type DashboardRole = Exclude<
+  Enums<"ORGANIZATION_MEMBER_ROLE">,
+  "SPOT_OWNER"
+>;
+
+/**
+ * Membresía del usuario en una organización, o null si no puede entrar al
+ * dashboard. `domain` es el host donde está publicada la app del evento: de ahí
+ * salen los links que se imprimen en los QR de los stands.
  */
 export type Membership = {
-  role: Enums<"ORGANIZATION_MEMBER_ROLE">;
+  role: DashboardRole;
   organization: Pick<
     Tables<"organizations">,
     "id" | "name" | "slug" | "domain"
