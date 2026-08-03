@@ -22,12 +22,19 @@ type SpotsTableProps = Readonly<{
   spots: EventSpot[];
   /** Un evento terminado no admite altas: sus stands son historia. */
   editable: boolean;
+  /** Host donde está publicada la app del evento; sin él no hay QR. */
+  domain: string | null;
 }>;
 
-export function SpotsTable({ eventId, spots, editable }: SpotsTableProps) {
+export function SpotsTable({
+  eventId,
+  spots,
+  editable,
+  domain,
+}: SpotsTableProps) {
   const columns = useMemo(
-    () => spotColumns(eventId, editable),
-    [eventId, editable],
+    () => spotColumns(eventId, editable, domain),
+    [eventId, editable, domain],
   );
 
   return (

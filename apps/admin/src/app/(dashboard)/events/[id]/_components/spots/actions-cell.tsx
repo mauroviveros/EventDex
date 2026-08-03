@@ -1,6 +1,6 @@
 "use client";
 
-import { QrCode, SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { deleteSpot } from "../../spots/actions";
+import { SpotQrDialog } from "./qr-dialog";
 
 /**
  * Botón deshabilitado con su explicación. El span envuelve al botón porque un
@@ -51,15 +52,18 @@ type SpotActionsCellProps = Readonly<{
   name: string;
   scans: number;
   editable: boolean;
+  /** URL pública del stand; null si la organización no tiene dominio. */
+  url: string | null;
 }>;
 
-/** Acciones por stand: editar, ver su QR (pendiente) y darlo de baja. */
+/** Acciones por stand: editar, ver e imprimir su QR, y darlo de baja. */
 export function SpotActionsCell({
   eventId,
   spotId,
   name,
   scans,
   editable,
+  url,
 }: SpotActionsCellProps) {
   const finished = "Un evento finalizado no se puede editar.";
 
@@ -87,9 +91,7 @@ export function SpotActionsCell({
         </DisabledAction>
       )}
 
-      <DisabledAction label="Ver QR" reason="Ver QR (próximamente)">
-        <QrCode />
-      </DisabledAction>
+      <SpotQrDialog eventId={eventId} spotId={spotId} name={name} url={url} />
 
       {editable ? (
         <AlertDialog>

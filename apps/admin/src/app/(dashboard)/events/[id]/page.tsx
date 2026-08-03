@@ -61,6 +61,7 @@ export default async function EventDetailPage({
               eventId={event.id}
               spots={spots}
               editable={phase !== "FINISHED"}
+              domain={membership.organization.domain}
             />
           }
           participants={

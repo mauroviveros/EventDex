@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { EventSpot } from "@/types";
-import { initials } from "@/utils";
+import { initials, spotPublicUrl } from "@/utils";
 import { SpotActionsCell } from "./actions-cell";
 import { SpotStatusBadge } from "./status-badge";
 
@@ -16,11 +16,13 @@ const TYPES: Record<string, string> = {
 /**
  * Columnas de la tabla de stands. El eventId lo necesitan el toggle de estado
  * y los links de la fila; `editable` es false en un evento finalizado, donde
- * los stands solo se miran.
+ * los stands solo se miran; `domain` es el host de la organización, con el que
+ * se arma el link que va impreso en cada QR.
  */
 export function spotColumns(
   eventId: string,
   editable: boolean,
+  domain: string | null,
 ): ColumnDef<EventSpot>[] {
   return [
     {
@@ -86,6 +88,7 @@ export function spotColumns(
           name={row.original.name}
           scans={row.original.count.scans}
           editable={editable}
+          url={spotPublicUrl(domain, row.original.id)}
         />
       ),
     },

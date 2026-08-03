@@ -4,10 +4,17 @@ import type { Enums, Tables } from "@eventdex/database";
 // entrada evita tocar los imports de la app si el paquete cambia de estructura.
 export * from "@eventdex/database";
 
-/** Membresía del usuario en una organización, o null si no es organizador. */
+/**
+ * Membresía del usuario en una organización, o null si no es organizador.
+ * `domain` es el host donde está publicada la app del evento: de ahí salen los
+ * links que se imprimen en los QR de los stands.
+ */
 export type Membership = {
   role: Enums<"ORGANIZATION_MEMBER_ROLE">;
-  organization: Pick<Tables<"organizations">, "id" | "name" | "slug">;
+  organization: Pick<
+    Tables<"organizations">,
+    "id" | "name" | "slug" | "domain"
+  >;
 };
 
 /**

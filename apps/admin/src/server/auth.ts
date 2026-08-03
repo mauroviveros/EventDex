@@ -30,7 +30,9 @@ export async function getMembership(
   const service = createServiceClient();
   const { data } = await service
     .from("organization_members")
-    .select("organization_id, role, organization:organizations(id, name, slug)")
+    .select(
+      "organization_id, role, organization:organizations(id, name, slug, domain)",
+    )
     .eq("user_id", userId)
     .limit(1)
     .maybeSingle();
