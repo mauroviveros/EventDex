@@ -41,6 +41,43 @@ evento, no con la organización.
 - **Se registra por evento**, no globalmente: asistir a la Expo 2026 no lo inscribe
   en la Expo 2027.
 
+#### Visitantes nuevos vs. recurrentes
+
+Justamente porque el registro es **por evento**, la tabla responde sola cuánta
+gente es nueva y cuánta vuelve. No hace falta guardar nada extra: se deriva de
+comparar cada registro con los anteriores del mismo usuario.
+
+Se expone como vista `event_visitor_cohorts`, con dos segmentos:
+
+| Segmento | Definición | Qué te dice |
+|----------|-----------|-------------|
+| **Nuevo** | Su primer registro a un evento de *esta* organización | Alcance real de la edición: a cuánta gente nueva llegaste |
+| **Recurrente** | Ya estuvo en una edición anterior de esta organización | Retención entre ediciones |
+
+Más `previous_org_events`, que dice a cuántas ediciones previas había venido —
+con eso salen curvas de fidelidad ("el 12% ya vino a las tres ediciones").
+
+`event_visitor_stats` agrega esos conteos por evento, listo para el dashboard, e
+incluye el desglose por `source`: cuántos se registraron escaneando un QR y
+cuántos desde la landing antes de llegar al predio.
+
+> **Por qué el corte es por organización y no por plataforma.** "Nuevo en toda
+> Eventdex" suena como la métrica obvia, pero no puede vivir en esta vista: la
+> vista respeta RLS, así que la window function solo ve los registros de la
+> organización que consulta, y el cálculo daría mal. Además, que el staff de un
+> cliente sepa que un visitante ya asistió a un evento de **otro** cliente es
+> información cross-tenant que no le corresponde. Esa métrica existe, pero como
+> `app.platform_visitor_stats()`, restringida al rol developer y pensada para el
+> panel de plataforma.
+
+> **Sobre "primer login del evento":** lo que se mide es el primer **registro**,
+> no el primer login. Alguien que inicia sesión y mira la landing sin escanear
+> nada no genera ninguna fila y es invisible para estas métricas. Es una
+> limitación real, y la solución no es la base de datos sino analytics de
+> producto (un evento `event_viewed` en Vercel Analytics o similar). Para "cuántos
+> visitantes tuve y cuántos eran nuevos", el registro es la medida correcta:
+> significa que la persona efectivamente participó.
+
 ### 🎪 Expositor (`event_members.role = 'exhibitor'`)
 
 Quien atiende un stand. Existe para que el staff no tenga que cargar los datos de

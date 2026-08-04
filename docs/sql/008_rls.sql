@@ -451,7 +451,9 @@ grant execute on function
   public.duplicate_event(uuid, text, text, int, boolean, boolean),
   public.raffle_eligible(uuid),
   public.draw_raffle(uuid, text),
-  public.void_draw(uuid, text)
+  public.void_draw(uuid, text),
+  -- Guard de platform admin adentro de la función.
+  public.platform_visitor_stats(uuid)
   to authenticated;
 
 grant execute on function

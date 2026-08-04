@@ -349,9 +349,33 @@ spot puede tener varios encargados.
 de `spot_claims`.
 
 Novedad respecto de v1, donde "estar registrado" era implícito (existías si habías
-escaneado algo). Hacerlo explícito da cuatro cosas: ancla para RLS ("podés leer el
+escaneado algo). Hacerlo explícito da cinco cosas: ancla para RLS ("podés leer el
 evento al que te registraste"), la métrica registrados → escanearon, la posibilidad
-de bloquear a alguien, y contar asistentes con cero escaneos.
+de bloquear a alguien, contar asistentes con cero escaneos, y —porque el registro
+es **por evento**— las **cohortes de visitantes nuevos vs. recurrentes** sin
+guardar un solo dato extra.
+
+Esa última se deriva comparando cada registro con los anteriores del mismo
+usuario, y se expone en la vista `event_visitor_cohorts`:
+
+| Campo | Significado |
+|-------|-------------|
+| `is_first_org_visit` | Primer registro del usuario en *esta* organización |
+| `previous_org_events` | A cuántas ediciones previas de la org ya había venido |
+
+El corte es **por organización**, no por plataforma: la vista respeta RLS, así
+que la window function solo ve los registros de la organización que consulta.
+Particionar solo por `user_id` daría resultados incorrectos, además de filtrar
+información cross-tenant. La métrica de plataforma existe como
+`app.platform_visitor_stats()`, restringida al rol developer.
+
+**No se guarda en columnas a propósito.** Un `is_first_visit boolean` calculado al
+insertar sería más rápido de leer, pero es dato derivado: se desincroniza en
+cuanto se corrige un registro a mano. La window function sobre unos miles de filas
+por evento, con el índice `(user_id, registered_at)`, es trivial. Si algún día
+pesa, se materializa la vista — y recién ahí se paga el costo de mantenerla.
+
+Ver [02 — Visitantes nuevos vs. recurrentes](./02-roles-y-permisos.md#visitantes-nuevos-vs-recurrentes).
 
 #### `spot_claims`
 
@@ -463,6 +487,8 @@ todo lo que toca tiene que quedar registrado.
 |-------|----------|
 | `event_timeline` | `event_id`, `starts_at` (min), `ends_at` (max), `phase` calculada |
 | `event_spots_resolved` | Spot del evento con overrides y snapshot ya resueltos |
+| `event_visitor_cohorts` | Cada registro marcado como visitante nuevo o recurrente |
+| `event_visitor_stats` | Resumen por evento: nuevos vs. recurrentes, y el desglose QR vs. landing |
 | `event_stats` | Conteos por evento: spots activos, registrados, reclamos, completaron |
 | `raffle_eligible` | Participantes elegibles de un sorteo, ya filtrados |
 

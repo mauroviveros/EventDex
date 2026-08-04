@@ -29,8 +29,11 @@ create table public.event_registrations (
 create index event_registrations_event_status_idx
   on public.event_registrations (event_id, status);
 
-create index event_registrations_user_idx
-  on public.event_registrations (user_id);
+-- (user_id, registered_at) y no solo (user_id): además de resolver "a qué
+-- eventos fue esta persona", es el índice que ordena las cohortes de visitantes
+-- nuevos vs. recurrentes (vista event_visitor_cohorts).
+create index event_registrations_user_time_idx
+  on public.event_registrations (user_id, registered_at);
 
 create trigger event_registrations_set_updated_at
   before update on public.event_registrations

@@ -174,6 +174,93 @@ select id, slug, name, logo_path, brand, default_timezone
 from public.organizations
 where status = 'active' and deleted_at is null;
 
+-- Cohortes de visitantes: quién es nuevo para la organización y quién vuelve.
+--
+-- No se guarda en columnas porque es derivable y las columnas derivadas se
+-- desincronizan. El costo es una window function sobre unos pocos miles de
+-- filas por evento, que con el índice (user_id, registered_at) es trivial.
+--
+-- `row_number()` y no `min(registered_at)`: si dos registros de un mismo usuario
+-- comparten timestamp exacto, `min()` marcaría los dos como "primero".
+--
+-- ⚠️ Esta vista es `security_invoker`, así que la window function solo ve las
+-- filas que RLS le deja ver a quien consulta. Por eso TODAS las particiones
+-- incluyen `organization_id`: un miembro de la org ve el 100% de los registros
+-- de su organización, así que el cálculo es exacto. Una métrica particionada
+-- solo por `user_id` (¿es nuevo en toda la plataforma?) daría MAL acá, porque
+-- las filas de otras organizaciones están filtradas — esa vive abajo, en
+-- `app.platform_visitor_stats()`, restringida a platform admins.
+create or replace view public.event_visitor_cohorts
+with (security_invoker = true) as
+select
+  r.id,
+  r.event_id,
+  r.organization_id,
+  r.user_id,
+  r.registered_at,
+  r.source,
+
+  -- Primera vez en ESTA organización. Es la métrica que importa para el
+  -- organizador: "cuántos de los que vinieron son gente nueva para nosotros".
+  row_number() over (
+    partition by r.user_id, r.organization_id order by r.registered_at, r.id
+  ) = 1 as is_first_org_visit,
+
+  -- A cuántas ediciones previas de esta organización ya había venido.
+  (row_number() over (
+    partition by r.user_id, r.organization_id order by r.registered_at, r.id
+  ) - 1) as previous_org_events
+from public.event_registrations r
+where r.status = 'active';
+
+-- Resumen por evento: la fila que va al dashboard.
+create or replace view public.event_visitor_stats
+with (security_invoker = true) as
+select
+  c.event_id,
+  c.organization_id,
+  count(*)                                          as registrations,
+  count(*) filter (where c.is_first_org_visit)      as new_visitors,
+  count(*) filter (where not c.is_first_org_visit)  as returning_visitors,
+  -- Cuántos se registraron escaneando un QR vs. desde la landing.
+  count(*) filter (where c.source = 'qr')           as via_qr,
+  count(*) filter (where c.source = 'landing')      as via_landing
+from public.event_visitor_cohorts c
+group by c.event_id, c.organization_id;
+
+-- Métrica cross-organización: cuánta gente es nueva en TODA la plataforma.
+--
+-- Es una función security definer y no una columna de la vista de arriba por dos
+-- razones: (1) bajo security_invoker el cálculo sería incorrecto, porque la
+-- window function no vería las filas de otras organizaciones; (2) saber que un
+-- visitante ya asistió a un evento de otro cliente es información cross-tenant
+-- que el staff de una organización no debería ver.
+-- Vive en `public` y no en `app` porque el panel de plataforma tiene que poder
+-- invocarla: Supabase solo expone `public` vía PostgREST. El guard va adentro.
+create or replace function public.platform_visitor_stats(p_event_id uuid)
+returns table (registrations bigint, new_to_platform bigint, seen_before bigint)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not app.is_platform_admin() then
+    raise exception 'Sin permisos' using errcode = '42501';
+  end if;
+
+  return query
+  with ranked as (
+    select r.event_id,
+           row_number() over (partition by r.user_id order by r.registered_at, r.id) = 1
+             as is_first_platform_visit
+    from public.event_registrations r
+    where r.status = 'active'
+  )
+  select count(*),
+         count(*) filter (where ranked.is_first_platform_visit),
+         count(*) filter (where not ranked.is_first_platform_visit)
+  from ranked
+  where ranked.event_id = p_event_id;
+end;
+$$;
+
 -- Métricas por evento, en una sola pasada.
 create or replace view public.event_stats
 with (security_invoker = true) as
