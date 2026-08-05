@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "web",
-        "landing"
+        "landing",
+        "admin"
     ]
 }
