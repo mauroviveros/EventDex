@@ -22,10 +22,11 @@ antes de pasar a la siguiente.
 
 ## Fase 1 — Esqueleto del monorepo
 
-- [ ] `pnpm-workspace.yaml`, `turbo.json`, `.gitignore`, `.editorconfig`
-- [ ] `packages/config` — tsconfig, biome y preset de Tailwind compartidos
-- [ ] `packages/db` — placeholder de tipos
-- [ ] `apps/web` (Astro), `apps/admin` (Next), `apps/landing` (Astro) — scaffolds
+- [x] `pnpm-workspace.yaml`, `turbo.json`, `.gitignore`, `.editorconfig`
+- [x] `packages/config` — tsconfig, biome y preset de Tailwind compartidos
+- [ ] `packages/db` — placeholder de tipos (se hace en la fase 3, con los tipos
+      ya generados; un placeholder ahora no aporta nada)
+- [x] `apps/web` (Astro), `apps/admin` (Next), `apps/landing` (Astro) — scaffolds
       que compilan y no hacen nada
 - [ ] CI: lint + types + build con `turbo --affected`
 
