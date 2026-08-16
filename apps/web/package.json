@@ -20,5 +20,8 @@
   },
   "dependencies": {
     "astro": "^7.1.6"
+  },
+  "devDependencies": {
+    "@eventdex/config": "workspace:*"
   }
 }

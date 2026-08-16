@@ -1,0 +1,23 @@
+{
+  "name": "@eventdex/config",
+  "description": "Shared tsconfig, biome and tailwind presets",
+  "author": {
+    "name": "Mauro Daniel Viveros (TRY Ubbe)",
+    "email": "maurod.viveros@gmail.com",
+    "url": "https://github.com/mauroviveros"
+  },
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "files": ["tsconfig", "biome.json", "tailwind.css"],
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/astro.json": "./tsconfig/astro.json",
+    "./tsconfig/next.json": "./tsconfig/next.json",
+    "./biome.json": "./biome.json",
+    "./tailwind.css": "./tailwind.css"
+  }
+}
