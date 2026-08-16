@@ -16,12 +16,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check-types": "astro check"
   },
   "dependencies": {
     "astro": "^7.1.6"
   },
   "devDependencies": {
-    "@eventdex/config": "workspace:*"
+    "@astrojs/check": "^0.9.10",
+    "@eventdex/config": "workspace:*",
+    "typescript": "^5.9.3"
   }
 }
