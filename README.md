@@ -1,159 +1,78 @@
-# Turborepo starter
+# Eventdex v2
 
-This Turborepo starter is maintained by the Turborepo core team.
+Plataforma de eventos multi-tenant: cada organización sirve su app pública desde su
+propio dominio, contra un solo deployment.
 
-## Using this example
+El diseño completo vive en [`docs/`](./docs) — empezar por
+[00 — Visión](./docs/00-vision.md) y [01 — Arquitectura](./docs/01-arquitectura.md).
 
-Run the following command:
+## Estructura
 
-```sh
-npx create-turbo@latest
+```
+eventdex/
+├── apps/
+│   ├── web/          Astro SSR · app pública del evento (multi-tenant por Host)
+│   ├── admin/        Next.js · dashboard de organización
+│   └── landing/      Astro estático · marketing (eventdex.com)
+├── packages/
+│   └── config/       tsconfig, biome y preset de Tailwind compartidos
+├── docs/             Diseño, modelo de datos, RLS, roadmap y SQL
+└── turbo.json        Pipeline de tareas
 ```
 
-## What's inside?
+Los packages `db`, `supabase`, `auth`, `domain` y `ui` llegan en la fase 3
+(ver [06 — Roadmap](./docs/06-roadmap.md)).
 
-This Turborepo includes the following packages/apps:
+## Stack
 
-### Apps and Packages
+| Capa | Elección |
+|------|----------|
+| App pública | Astro 5 (SSR, adapter Vercel) + islas React |
+| Dashboard | Next.js 16 App Router + React 19 |
+| Landing | Astro 5 (estático) |
+| Base de datos / Auth | Supabase (Postgres, RLS, OAuth) |
+| Estilos | Tailwind v4 + shadcn/ui |
+| Monorepo | Turborepo + pnpm workspaces |
+| Lint / format | Biome |
+| Tests | Vitest |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Requisitos
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Node >= 22.12
+- pnpm 11 (`corepack enable`)
 
-### Utilities
+## Comandos
 
-This Turborepo has some additional tools already setup for you:
+Todos desde la raíz; turbo los reparte entre las apps.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+pnpm install
 ```
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+```bash
+pnpm dev
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```bash
+pnpm build
 ```
 
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```bash
+pnpm lint && pnpm check-types
 ```
 
-### Develop
+`pnpm format` aplica los fixes de Biome. Para trabajar sobre una sola app:
 
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+```bash
+pnpm --filter @eventdex/web dev
 ```
 
-Without global `turbo`, use your package manager:
+## Convenciones
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- **Lint y formato**: Biome en todo el repo. Biome no parsea `.astro`, así que el
+  markup de las apps Astro queda cubierto por `astro check` (que es lo que corre
+  `check-types` ahí).
+- **tsconfig**: las tres apps extienden de `@eventdex/config/tsconfig/*`.
+- **Tokens de diseño**: `@eventdex/config/tailwind.css`. Los tokens `--brand-*`
+  son la indirección que va a pisar `organizations.brand` por tenant.
+- **Commits**: `<type>(<scope>): :gitmoji: <mensaje>`.
