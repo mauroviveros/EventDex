@@ -19,6 +19,9 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    // Multi-tenant: en dev hay que poder pegarle con el Host de cualquier cliente
+    // (via /etc/hosts o `curl -H Host:`). `server` solo aplica al dev server.
+    server: { allowedHosts: true },
   },
 
   env: {
