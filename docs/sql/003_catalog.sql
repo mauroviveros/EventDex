@@ -46,7 +46,7 @@ create trigger venues_set_updated_at
 create table public.spots (
   id              uuid primary key default gen_random_uuid(),
   organization_id uuid   not null references public.organizations (id) on delete cascade,
-  slug            citext not null,
+  slug            extensions.citext not null,
   name            text   not null,
   description     text,
   type            public.spot_type not null default 'stand',
@@ -76,7 +76,7 @@ create trigger spots_set_updated_at
 create table public.event_series (
   id              uuid primary key default gen_random_uuid(),
   organization_id uuid   not null references public.organizations (id) on delete cascade,
-  slug            citext not null,
+  slug            extensions.citext not null,
   name            text   not null,
   description     text,
   created_at      timestamptz not null default now(),

@@ -9,7 +9,7 @@
 
 create table public.profiles (
   id           uuid primary key references auth.users (id) on delete cascade,
-  email        citext      not null,
+  email        extensions.citext      not null,
   full_name    text        not null default '',
   display_name text,
   avatar_url   text,
@@ -71,7 +71,7 @@ create table public.platform_admins (
 
 create table public.organizations (
   id               uuid primary key default gen_random_uuid(),
-  slug             citext not null unique,
+  slug             extensions.citext not null unique,
   name             text   not null,
   legal_name       text,
   logo_path        text,
@@ -100,7 +100,7 @@ create trigger organizations_set_updated_at
 create table public.organization_domains (
   id              uuid primary key default gen_random_uuid(),
   organization_id uuid   not null references public.organizations (id) on delete cascade,
-  hostname        citext not null unique,
+  hostname        extensions.citext not null unique,
   is_primary      boolean not null default false,
   verified_at     timestamptz,
   created_at      timestamptz not null default now()

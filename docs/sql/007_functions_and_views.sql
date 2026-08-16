@@ -285,7 +285,7 @@ returns uuid language sql stable security definer set search_path = '' as $$
   select d.organization_id
   from public.organization_domains d
   join public.organizations o on o.id = d.organization_id
-  where d.hostname = p_hostname::citext
+  where d.hostname = p_hostname::extensions.citext
     and o.status = 'active'
     and o.deleted_at is null
   limit 1;

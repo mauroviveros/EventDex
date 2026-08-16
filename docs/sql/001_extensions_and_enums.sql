@@ -2,9 +2,13 @@
 --
 -- Se aplica primero. Todo lo demás depende de esto.
 
-create extension if not exists "pgcrypto";   -- gen_random_uuid()
-create extension if not exists "citext";     -- comparación case-insensitive
-create extension if not exists "btree_gist"; -- constraint de exclusión en jornadas (opcional)
+-- Todas en el esquema `extensions`, que es donde Supabase las pone. Importa:
+-- las funciones de negocio corren con `search_path = ''` (obligatorio para
+-- security definer), así que cualquier tipo o función de extensión tiene que
+-- referenciarse calificado — de ahí `extensions.citext` en el resto del esquema.
+create extension if not exists "pgcrypto"   with schema extensions;  -- gen_random_uuid()
+create extension if not exists "citext"     with schema extensions;  -- comparación case-insensitive
+create extension if not exists "btree_gist" with schema extensions;  -- constraint de exclusión en jornadas (opcional)
 
 -- Esquema para los helpers de autorización. NO se expone vía PostgREST
 -- (Supabase publica solo `public` y `graphql_public`), así que nadie puede

@@ -11,7 +11,7 @@ create table public.events (
   organization_id uuid   not null references public.organizations (id) on delete cascade,
   series_id       uuid   references public.event_series (id) on delete set null,
   venue_id        uuid   references public.venues (id)       on delete set null,
-  slug            citext not null,
+  slug            extensions.citext not null,
   title           text   not null,
   edition_label   text,                          -- "2026", "Vol. 3"
   edition_number  int,                           -- ordena las ediciones de una serie
@@ -123,7 +123,7 @@ create table public.event_spots (
   -- RESTRICT: no se puede borrar un spot del catálogo usado en algún evento.
   -- Se archiva (spots.archived_at) y deja de ofrecerse.
   spot_id               uuid   not null references public.spots (id)  on delete restrict,
-  code                  citext not null,                             -- código corto legible: "A12"
+  code                  extensions.citext not null,                             -- código corto legible: "A12"
   name_override         text,                                        -- override de esta edición
   description_override  text,
   avatar_path_override  text,
