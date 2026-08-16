@@ -189,7 +189,7 @@ where status = 'active' and deleted_at is null;
 -- de su organización, así que el cálculo es exacto. Una métrica particionada
 -- solo por `user_id` (¿es nuevo en toda la plataforma?) daría MAL acá, porque
 -- las filas de otras organizaciones están filtradas — esa vive abajo, en
--- `app.platform_visitor_stats()`, restringida a platform admins.
+-- `public.platform_visitor_stats()`, restringida a platform admins.
 create or replace view public.event_visitor_cohorts
 with (security_invoker = true) as
 select

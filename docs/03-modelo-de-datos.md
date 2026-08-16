@@ -367,7 +367,7 @@ El corte es **por organización**, no por plataforma: la vista respeta RLS, así
 que la window function solo ve los registros de la organización que consulta.
 Particionar solo por `user_id` daría resultados incorrectos, además de filtrar
 información cross-tenant. La métrica de plataforma existe como
-`app.platform_visitor_stats()`, restringida al rol developer.
+`public.platform_visitor_stats()`, restringida al rol developer.
 
 **No se guarda en columnas a propósito.** Un `is_first_visit boolean` calculado al
 insertar sería más rápido de leer, pero es dato derivado: se desincroniza en

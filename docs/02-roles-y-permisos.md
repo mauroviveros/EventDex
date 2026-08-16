@@ -67,7 +67,7 @@ cuántos desde la landing antes de llegar al predio.
 > organización que consulta, y el cálculo daría mal. Además, que el staff de un
 > cliente sepa que un visitante ya asistió a un evento de **otro** cliente es
 > información cross-tenant que no le corresponde. Esa métrica existe, pero como
-> `app.platform_visitor_stats()`, restringida al rol developer y pensada para el
+> `public.platform_visitor_stats()`, restringida al rol developer y pensada para el
 > panel de plataforma.
 
 > **Sobre "primer login del evento":** lo que se mide es el primer **registro**,
