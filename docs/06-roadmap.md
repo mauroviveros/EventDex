@@ -36,13 +36,19 @@ antes de pasar a la siguiente.
 
 ## Fase 2 — Esquema en Supabase
 
+**Sin stack local.** Se descartó levantar Supabase con Docker: se trabaja
+directo contra el proyecto hosteado. Ver
+[el tradeoff y cómo se compensa](./sql/README.md#sin-db-reset-qué-se-pierde-y-cómo-se-compensa).
+
+- [x] Migraciones escritas en `supabase/migrations/` (001…008)
 - [ ] Proyecto Supabase nuevo, vacío. El de v1 no se toca: queda como respaldo
       de consulta hasta que la v2 esté en producción
+- [ ] `pnpm db:link` contra el proyecto nuevo
 - [ ] Configurar el proveedor OAuth (Google) en el proyecto nuevo
-- [ ] Aplicar `docs/sql/001` … `009` como migraciones
-- [ ] Generar tipos → `packages/db`
-- [ ] Seed con una organización, una serie, dos eventos y 10 spots
-- [ ] Tests pgTAP del checklist de [04](./04-rls.md#cómo-se-prueba)
+- [ ] `pnpm db:push` y verificar con `supabase/tests/verify.sql`
+- [ ] Crear los dos usuarios de prueba y correr `supabase/seed.sql`
+- [ ] `pnpm db:types` → `packages/db`
+- [ ] Tests de permisos del checklist de [04](./04-rls.md#cómo-se-prueba)
 
 **Commit:** `feat:🗃️ add v2 database schema with RLS`
 

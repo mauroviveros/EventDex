@@ -1,5 +1,16 @@
 # For detailed configuration reference documentation, visit:
 # https://supabase.com/docs/guides/local-development/cli/config
+#
+# ⚠️ NO se levanta el stack local con Docker: se trabaja contra el proyecto
+# hosteado (`pnpm db:link` / `db:push` / `db:types`). De este archivo solo son
+# relevantes `project_id` y `[db] major_version`; el resto —puertos, SMTP,
+# storage, realtime, proveedores de auth— es configuración del stack local y
+# hoy no se aplica a nada. La configuración real de auth y storage se hace en
+# el dashboard del proyecto.
+#
+# Se deja completo y no recortado porque el CLI lo regenera y valida, y porque
+# vuelve a servir tal cual si en algún momento se decide levantar el stack.
+#
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
 project_id = "eventdex"

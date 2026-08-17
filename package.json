@@ -22,13 +22,12 @@
     "format": "turbo run format",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
-    "db:start": "supabase start",
-    "db:stop": "supabase stop",
-    "db:status": "supabase status",
-    "db:reset": "supabase db reset",
+    "db:link": "supabase link",
     "db:new": "supabase migration new",
-    "db:diff": "supabase db diff",
-    "db:push": "supabase db push"
+    "db:diff": "supabase db diff --linked",
+    "db:push": "supabase db push",
+    "db:pull": "supabase db pull",
+    "db:types": "mkdir -p packages/db/src && supabase gen types typescript --linked --schema public > packages/db/src/database.types.ts"
   },
   "packageManager": "pnpm@11.20.0",
   "devDependencies": {

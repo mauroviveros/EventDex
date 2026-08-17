@@ -17,15 +17,46 @@ proyecto Supabase **limpio**: no contienen `drop`, no migran datos de v1.
 
 ## Cómo aplicarlo
 
+Los `001`…`008` de esta carpeta ya están copiados a `supabase/migrations/` con su
+timestamp: **esa es la fuente de verdad**, esta carpeta queda como referencia
+comentada del diseño.
+
+**No hay stack local con Docker.** Se trabaja contra el proyecto hosteado:
+
 ```bash
-supabase db reset
+pnpm db:link      # una sola vez, contra el proyecto v2
+pnpm db:push      # aplica las migraciones pendientes
+pnpm db:types     # regenera los tipos en packages/db
 ```
 
-Copiando cada archivo a `supabase/migrations/` con su timestamp. O, para probar
-rápido, pegándolos en orden en el SQL Editor del dashboard.
+Después, los datos de prueba y la verificación (ninguno de los dos viaja en
+`db:push`, a propósito):
 
-⚠️ `009_seed.sql` necesita dos usuarios existentes en `auth.users`. Creálos desde
-el dashboard y reemplazá los UUID del bloque `declare`.
+```bash
+psql "$DATABASE_URL" -f supabase/seed.sql
+psql "$DATABASE_URL" -f supabase/tests/verify.sql
+```
+
+⚠️ El seed **no crea usuarios**: espera que `owner@eventdex.test` y
+`visitor@eventdex.test` ya existan en `auth.users`. Creálos una vez desde
+Authentication → Add user. Poner usuarios con password conocida por SQL en un
+proyecto alcanzable desde internet es regalar una credencial.
+
+### Sin `db reset`: qué se pierde y cómo se compensa
+
+`supabase db reset` era lo que verificaba que las migraciones aplican limpio
+**desde cero**. Sin stack local no existe, y `db push` es de ida: una migración
+rota en un proyecto hosteado es bastante más molesta de deshacer.
+
+Se compensa con tres reglas:
+
+1. **Las migraciones son append-only.** Nunca editar una ya aplicada; corregir
+   siempre con una migración nueva.
+2. **`pnpm db:diff --linked` antes de cada push**, para ver exactamente qué va a
+   cambiar.
+3. Cuando el esquema empiece a moverse seguido, **un segundo proyecto Supabase
+   de staging** contra el que pushear primero. Es el reemplazo real del reset
+   local, y cuesta lo mismo que crear un proyecto.
 
 ## Dos cosas que no son obvias y conviene no romper
 

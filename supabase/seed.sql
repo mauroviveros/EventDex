@@ -1,82 +1,33 @@
--- Seed de desarrollo LOCAL.
+-- Seed de desarrollo.
 --
--- Corre en `supabase db reset`, después de todas las migraciones.
+-- Se aplica a mano contra el proyecto Supabase hosteado (no hay stack local):
 --
--- ⚠️ SOLO LOCAL. Nunca se aplica a producción: crea usuarios en auth.users con
--- password conocida. `supabase db push` sube migrations/, no este archivo.
+--   psql "$DATABASE_URL" -f supabase/seed.sql
 --
--- Los dos usuarios que docs/sql/009_seed.sql pedía crear a mano desde el
--- dashboard se crean acá, con UUID fijos para que el seed sea reproducible.
--- El trigger `on_auth_user_created` les arma el profile solo.
-
--- Usuarios de prueba ---------------------------------------------------------
---   owner@eventdex.test   / password123  → owner de la organización + developer
---   visitor@eventdex.test / password123  → visitante
-do $$
-declare
-  v_users jsonb := jsonb_build_array(
-    jsonb_build_object(
-      'id',    '00000000-0000-0000-0000-000000000001',
-      'email', 'owner@eventdex.test',
-      'name',  'Owner de prueba'
-    ),
-    jsonb_build_object(
-      'id',    '00000000-0000-0000-0000-000000000002',
-      'email', 'visitor@eventdex.test',
-      'name',  'Visitante de prueba'
-    )
-  );
-  v_user  jsonb;
-  v_id    uuid;
-  v_email text;
-begin
-  for v_user in select * from jsonb_array_elements(v_users) loop
-    v_id    := (v_user ->> 'id')::uuid;
-    v_email := v_user ->> 'email';
-
-    insert into auth.users (
-      instance_id, id, aud, role, email, encrypted_password,
-      email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-      created_at, updated_at
-    )
-    values (
-      '00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated',
-      v_email, extensions.crypt('password123', extensions.gen_salt('bf')),
-      now(),
-      '{"provider":"email","providers":["email"]}'::jsonb,
-      jsonb_build_object('full_name', v_user ->> 'name', 'email', v_email),
-      now(), now()
-    )
-    on conflict (id) do nothing;
-
-    -- Sin identity, GoTrue no deja iniciar sesión con email/password.
-    insert into auth.identities (
-      provider_id, user_id, identity_data, provider,
-      last_sign_in_at, created_at, updated_at
-    )
-    values (
-      v_id::text, v_id,
-      jsonb_build_object('sub', v_id::text, 'email', v_email, 'email_verified', true),
-      'email', now(), now(), now()
-    )
-    on conflict (provider, provider_id) do nothing;
-  end loop;
-end $$;
-
--- 009 — Seed de desarrollo
+-- ...o pegándolo en el SQL Editor del dashboard. `supabase db push` sube
+-- migrations/, NO este archivo — que es justo lo que se quiere: los datos de
+-- prueba nunca viajan solos.
+--
+-- ⚠️ NO crea usuarios. Un `auth.users` con password conocida en un proyecto
+-- alcanzable desde internet es una credencial regalada. Los dos usuarios se
+-- crean antes, una sola vez, desde el dashboard (Authentication → Add user) o
+-- iniciando sesión con Google; el trigger `on_auth_user_created` les arma el
+-- profile solo. Este script los busca por email y aborta con un mensaje claro
+-- si no existen.
+--
+-- Usuarios que espera:
+--   owner@eventdex.test   → owner de la organización + developer
+--   visitor@eventdex.test → visitante
 --
 -- Una organización, una serie, dos ediciones (una terminada y una próxima),
--- una sede y cinco spots del catálogo reutilizados entre ambas.
---
--- Sirve para verificar de una que resolve_active_event() elige bien y que un
--- mismo spot vive en dos ediciones sin duplicarse.
---
--- Los usuarios los crea el bloque de arriba; los UUID coinciden.
+-- una sede y cinco spots del catálogo reutilizados entre ambas. Sirve para
+-- verificar de una que resolve_active_event() elige bien y que un mismo spot
+-- vive en dos ediciones sin duplicarse.
 
 do $$
 declare
-  v_owner_id   uuid := '00000000-0000-0000-0000-000000000001';  -- owner@eventdex.test
-  v_visitor_id uuid := '00000000-0000-0000-0000-000000000002';  -- visitor@eventdex.test
+  v_owner_id   uuid;
+  v_visitor_id uuid;
 
   v_org      uuid;
   v_venue    uuid;
@@ -88,6 +39,21 @@ declare
   v_types    public.spot_type[] := array['stand', 'attraction', 'sponsor', 'activity', 'stand']::public.spot_type[];
   i int;
 begin
+  -- Usuarios: se buscan, no se crean ----------------------------------------
+  select id into v_owner_id   from auth.users where email = 'owner@eventdex.test';
+  select id into v_visitor_id from auth.users where email = 'visitor@eventdex.test';
+
+  if v_owner_id is null or v_visitor_id is null then
+    raise exception
+      'Faltan los usuarios de prueba. Creá owner@eventdex.test y visitor@eventdex.test desde Authentication → Add user y volvé a correr este seed.';
+  end if;
+
+  -- Idempotencia: correrlo dos veces no duplica la organización.
+  if exists (select 1 from public.organizations where slug = 'ubbe') then
+    raise notice 'La organización ya existe, no se hace nada.';
+    return;
+  end if;
+
   -- Organización -----------------------------------------------------------
   insert into public.organizations (slug, name, legal_name, brand)
   values ('ubbe', 'TRY Ubbe', 'TRY Ubbe SRL',

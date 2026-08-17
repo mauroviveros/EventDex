@@ -272,11 +272,18 @@ En v1 hay tres casos que caen exactamente ahí y en v2 se resuelven con RLS:
 
 Sin tests, una matriz de permisos de este tamaño se rompe sola.
 
+Al no haber stack local, corren **contra el proyecto hosteado**, dentro de una
+transacción que se revierte al final. pgTAP está disponible en Supabase hosted;
+hay que habilitarlo una vez (`create extension if not exists pgtap with schema
+extensions`).
+
 ```sql
+begin;
 -- pgTAP: por cada tabla y cada rol, afirmar qué ve y qué no.
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"<uuid-del-visitante>"}';
 select is_empty('select * from events where status = ''draft''');
+rollback;  -- nada de esto toca los datos reales
 ```
 
 Mínimo a cubrir antes de dar el esquema por bueno:

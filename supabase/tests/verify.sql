@@ -1,6 +1,12 @@
--- Verificación post-reset. Las queries de docs/sql/README.md, en un solo archivo.
+-- Verificación del esquema. Las queries de docs/sql/README.md, en un solo archivo.
 --
---   pnpm exec supabase db reset && psql "$(pnpm exec supabase status -o env | ...)" -f supabase/tests/verify.sql
+-- Se corre contra el proyecto hosteado, después de `pnpm db:push`:
+--
+--   psql "$DATABASE_URL" -f supabase/tests/verify.sql
+--
+-- El connection string sale del dashboard (Project Settings → Database →
+-- Connection string → URI). También se puede pegar el contenido en el SQL
+-- Editor, salteando los `\echo`.
 --
 -- Las tres primeras tienen que devolver 0 filas. La cuarta, la edición próxima.
 
