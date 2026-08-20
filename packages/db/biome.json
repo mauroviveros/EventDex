@@ -1,0 +1,3 @@
+{
+  "extends": "@eventdex/config/biome.json"
+}

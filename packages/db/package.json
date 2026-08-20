@@ -1,0 +1,25 @@
+{
+  "name": "@eventdex/db",
+  "description": "Generated Supabase types and shared DTOs",
+  "author": {
+    "name": "Mauro Daniel Viveros (TRY Ubbe)",
+    "email": "maurod.viveros@gmail.com",
+    "url": "https://github.com/mauroviveros"
+  },
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=22.12.0" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eventdex/config": "workspace:*",
+    "typescript": "^7.0.2"
+  }
+}

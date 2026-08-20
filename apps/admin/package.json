@@ -22,7 +22,8 @@
   "dependencies": {
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "@eventdex/db": "workspace:*"
   },
   "devDependencies": {
     "@eventdex/config": "workspace:*",
