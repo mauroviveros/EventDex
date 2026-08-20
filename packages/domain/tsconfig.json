@@ -1,0 +1,4 @@
+{
+  "extends": "@eventdex/config/tsconfig/base.json",
+  "include": ["src"]
+}
