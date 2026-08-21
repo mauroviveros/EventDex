@@ -143,6 +143,9 @@ create trigger organization_members_set_updated_at
 
 -- Invariante: una organización nunca se queda sin owners activos.
 -- Se hace cumplir acá y no en la interfaz porque la interfaz se puede saltear.
+--
+-- ⚠️ Esta versión tiene un bug: también bloquea el borrado en cascada cuando se
+-- borra la organización entera. Corregido en `011_fix_owner_guard_on_cascade.sql`.
 create or replace function app.prevent_last_owner_removal()
 returns trigger
 language plpgsql

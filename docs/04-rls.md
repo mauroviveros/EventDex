@@ -132,8 +132,28 @@ service key.
 | INSERT / UPDATE | `staff` y `owner` |
 | DELETE | Nadie (`archived_at` / `deleted_at`); el owner archiva vía UPDATE |
 
-Los spots del catálogo **no son públicos**. Lo público es el spot del evento
-(`event_spots`) de un evento publicado.
+El catálogo **no se abre entero**, pero tampoco puede estar cerrado del todo.
+
+La primera versión de este documento decía que los spots del catálogo no eran
+públicos y que lo público era solo `event_spots`. Eso **contradecía al
+[ADR-0003](./adr/0003-spots-reutilizables.md)**: la cadena de resolución cae a
+`spots.name` cuando no hay override ni snapshot, así que sin acceso al catálogo
+la grilla de stands sale sin nombres. La contradicción recién se vio cuando
+`apps/web` consultó como visitante anónimo y `spots` devolvió cero filas.
+
+Lo mismo pasaba con `venues`: la dirección de un evento publicado es información
+que el visitante necesita — es a dónde tiene que ir.
+
+La regla correcta es **exponer lo que ya se ve en pantalla, y nada más**:
+
+| Tabla | `anon` puede leer |
+|-------|-------------------|
+| `venues` | Solo las sedes de eventos publicados y públicos |
+| `spots` | Solo los spots **activos** en algún evento publicado y público |
+| `event_series` | Nada. Hoy la app muestra `events.title`, no el nombre de la serie |
+
+Un spot archivado, o que todavía no está en ningún evento, sigue siendo
+invisible. Las políticas están en la migración `open_public_catalog_reads`.
 
 ### `events`
 

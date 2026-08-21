@@ -14,6 +14,8 @@ proyecto Supabase **limpio**: no contienen `drop`, no migran datos de v1.
 | `007_functions_and_views.sql` | Helpers `app.*`, vistas, y funciones de negocio |
 | `008_rls.sql` | Políticas RLS, triggers de guardia y grants |
 | `009_seed.sql` | Datos de desarrollo |
+| `010_public_catalog_reads.sql` | Abre `venues` y `spots` al visitante anónimo, acotado a eventos publicados |
+| `011_fix_owner_guard_on_cascade.sql` | El guard del último owner bloqueaba el borrado en cascada de una organización |
 
 ## Cómo aplicarlo
 
@@ -35,6 +37,14 @@ Después, los datos de prueba y la verificación (ninguno de los dos viaja en
 ```bash
 psql "$DATABASE_URL" -f supabase/seed.sql
 psql "$DATABASE_URL" -f supabase/tests/verify.sql
+```
+
+Para volver a correr el seed hay que borrar antes la organización de prueba, y
+un `delete from organizations` pelado no alcanza (`event_invoices` y
+`event_spots.spot_id` son `on delete restrict`). Usá el snippet:
+
+```
+supabase/snippets/reset-seed.sql
 ```
 
 ⚠️ El seed **no crea usuarios**: espera que `owner@eventdex.test` y

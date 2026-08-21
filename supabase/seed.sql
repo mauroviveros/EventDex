@@ -92,13 +92,19 @@ begin
             v_types[i]);
   end loop;
 
+  -- Los eventos nacen en `draft` y se publican al final con `publish_event()`.
+  -- Poner `status = 'published'` a mano dejaría los eventos SIN snapshot, que es
+  -- un estado que la app real nunca produce: el snapshot es lo que hace que
+  -- renombrar un spot del catálogo no reescriba la historia de una edición
+  -- pasada (ver docs/adr/0003-spots-reutilizables.md).
+
   -- Edición pasada ---------------------------------------------------------
   insert into public.events (organization_id, series_id, venue_id, slug, title,
                              edition_label, edition_number, summary, description,
-                             timezone, status, published_at, created_by)
+                             timezone, created_by)
   values (v_org, v_series, v_venue, 'expo-ubbe-2025', 'Expo Ubbe',
           '2025', 1, 'La primera edición', 'Descripción larga',
-          'America/Argentina/Buenos_Aires', 'published', now() - interval '1 year', v_owner_id)
+          'America/Argentina/Buenos_Aires', v_owner_id)
   returning id into v_past;
 
   insert into public.event_schedules (event_id, organization_id, label, starts_at, ends_at)
@@ -107,10 +113,10 @@ begin
   -- Edición próxima --------------------------------------------------------
   insert into public.events (organization_id, series_id, venue_id, slug, title,
                              edition_label, edition_number, summary, description,
-                             timezone, status, published_at, created_by)
+                             timezone, created_by)
   values (v_org, v_series, v_venue, 'expo-ubbe-2026', 'Expo Ubbe',
           '2026', 2, 'La segunda edición', 'Descripción larga',
-          'America/Argentina/Buenos_Aires', 'published', now(), v_owner_id)
+          'America/Argentina/Buenos_Aires', v_owner_id)
   returning id into v_next;
 
   insert into public.event_schedules (event_id, organization_id, label, starts_at, ends_at)
@@ -136,6 +142,30 @@ begin
   -- Facturación -------------------------------------------------------------
   insert into public.event_invoices (organization_id, event_id, concept, amount_cents, status, due_at)
   values (v_org, v_next, 'Licencia Expo Ubbe 2026', 45000000, 'pending', current_date + 30);
+
+  -- Publicación -------------------------------------------------------------
+  --
+  -- `publish_event()` valida (jornadas + al menos un spot activo), congela los
+  -- snapshots y escribe en audit_logs. Llamarla acá en vez de poner
+  -- `status = 'published'` a mano hace dos cosas: deja los datos de prueba
+  -- iguales a los que produce la app, y de paso EJERCITA la función, que si no
+  -- no la prueba nadie hasta la fase 5.
+  --
+  -- La función chequea permisos con `app.can_edit_event()`, que lee
+  -- `auth.uid()`. En una sesión de SQL Editor o psql no hay JWT, así que
+  -- `auth.uid()` es null y el guard rechazaría la llamada. Suplantamos al owner
+  -- por el resto de la transacción: es la forma honesta de correr el seed,
+  -- porque pasa por el mismo control de permisos que la aplicación.
+  perform set_config('request.jwt.claims', json_build_object('sub', v_owner_id)::text, true);
+
+  perform public.publish_event(v_past);
+  perform public.publish_event(v_next);
+
+  -- `publish_event()` sella `published_at = now()`. Para la edición pasada eso
+  -- es mentira; se corrige acá para que el histórico sea creíble.
+  update public.events
+     set published_at = now() - interval '1 year'
+   where id = v_past;
 
   raise notice 'Seed OK — org % / edición próxima %', v_org, v_next;
 end $$;
