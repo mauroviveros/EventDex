@@ -1,6 +1,6 @@
 ---
 import Account from "@/components/Account.astro";
-import "@/styles/global.css";
+import Layout from "@/layouts/Layout.astro";
 
 /**
  * Adónde caen los fallos de `/auth/signin` y `/auth/callback`.
@@ -22,15 +22,12 @@ const REASONS: Record<string, string> = {
 const raw = Astro.url.searchParams.get("reason");
 const message = (raw && REASONS[raw]) ?? "No pudimos completar el ingreso.";
 ---
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width" />
-  <meta name="robots" content="noindex" />
-  <link rel="icon" href="/favicon.ico" />
-  <title>No pudimos completar el ingreso</title>
-</head>
-<body class="mx-auto max-w-md p-8 space-y-6">
+
+<Layout
+  title="No pudimos completar el ingreso"
+  description={message}
+  noindex={true}
+>
   <div class="space-y-2">
     <h1 class="text-2xl font-semibold">No pudimos completar el ingreso</h1>
     <p class="text-sm">{message}</p>
@@ -50,5 +47,4 @@ const message = (raw && REASONS[raw]) ?? "No pudimos completar el ingreso.";
       <a href="/" class="underline">Volver al inicio</a>
     </p>
   </div>
-</body>
-</html>
+</Layout>
