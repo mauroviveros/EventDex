@@ -29,8 +29,15 @@ export default defineConfig({
       // Fuerza el hostname en desarrollo para no tocar /etc/hosts
       PUBLIC_DEV_HOST: envField.string({ context: "server", access: "public", optional: true }),
       PUBLIC_ADMIN_URL: envField.string({ context: "client", access: "public", optional: true }),
-      // PUBLIC_SUPABASE_URL y PUBLIC_SUPABASE_PUBLISHABLE_KEY entran en la fase 3,
-      // junto con packages/supabase. Declararlas requeridas ahora rompe el build.
+
+      // Credenciales públicas de Supabase. `context: "client"` y no "server"
+      // porque las islas React van a necesitarlas para su propio cliente; desde
+      // el servidor también se importan de `astro:env/client`.
+      //
+      // Requeridas: una app pública sin credenciales no sirve para nada, así
+      // que es mejor que el build lo grite y no que falle en el primer request.
+      PUBLIC_SUPABASE_URL: envField.string({ context: "client", access: "public" }),
+      PUBLIC_SUPABASE_PUBLISHABLE_KEY: envField.string({ context: "client", access: "public" }),
     },
   },
 });

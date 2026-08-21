@@ -1,17 +1,68 @@
 ---
-import "../styles/global.css";
----
+import "@/styles/global.css";
+import { eventPhase, formatScheduleLabel } from "@eventdex/domain";
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Eventdex</title>
-	</head>
-	<body>
-		<h1 class="text-3xl font-semibold text-brand">Eventdex</h1>
-	</body>
+const { supabase, eventId } = Astro.locals;
+const { data: event } = eventId
+  ? await supabase
+      .from("events")
+      .select(`
+        id, title, edition_label, summary, timezone,
+        schedules:event_schedules(label, starts_at, ends_at),
+        venue:venues(name, city)
+      `)
+      .eq("id", eventId)
+      .single()
+  : { data: null };
+
+const schedules = event?.schedules ?? [];
+const phase = eventPhase(schedules);
+
+const PHASE_LABEL = {
+  upcoming: "Próximamente",
+  live: "En curso",
+  finished: "Finalizado",
+} as const;
+---
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{event?.title ?? "Eventdex"}</title>
+  </head>
+  <body class="mx-auto max-w-2xl p-8">
+    {
+      event ? (
+        <article>
+          {phase && <p class="text-sm uppercase tracking-wide">{PHASE_LABEL[phase]}</p>}
+
+          <h1 class="text-3xl font-semibold text-brand">
+            {event.title}
+            {event.edition_label && <span> · {event.edition_label}</span>}
+          </h1>
+
+          {event.summary && <p class="mt-2">{event.summary}</p>}
+
+          {event.venue && (
+            <p class="mt-1 text-sm">
+              {event.venue.name}
+              {event.venue.city && <span> · {event.venue.city}</span>}
+            </p>
+          )}
+
+          <ul class="mt-6 space-y-1">
+            {schedules.map((schedule) => (
+              <li>
+                {schedule.label && <strong>{schedule.label}: </strong>}
+                {formatScheduleLabel(schedule, event.timezone)}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ) : (
+        <p>Todavía no hay eventos publicados.</p>
+      )
+    }
+  </body>
 </html>

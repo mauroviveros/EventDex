@@ -97,6 +97,15 @@ importers:
       '@astrojs/vercel':
         specifier: ^11.0.5
         version: 11.0.5(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@20.19.43)(@vercel/functions@3.9.3)(jiti@2.7.0)(yaml@2.9.0))(next@16.3.0(@babel/core@7.29.7(supports-color@7.2.0))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+      '@eventdex/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@eventdex/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@eventdex/supabase':
+        specifier: workspace:*
+        version: link:../../packages/supabase
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.2.1(@types/node@20.19.43)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))

@@ -1,3 +1,8 @@
 {
-  "extends": "@eventdex/config/tsconfig/astro.json"
+  "extends": "@eventdex/config/tsconfig/astro.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
 }
