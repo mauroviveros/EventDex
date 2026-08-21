@@ -1,5 +1,5 @@
-import { isAuthProvider, safeNext } from "@/lib/auth";
 import type { APIRoute } from "astro";
+import { isAuthProvider, safeNext } from "@/lib/auth";
 
 /**
  * Arranca el login OAuth.
@@ -34,5 +34,4 @@ export const POST = (async ({ request, locals, redirect }) => {
   // 303 y no 302: convierte el POST en un GET, que es lo que espera el
   // proveedor. Con 302 algunos clientes reenvían el POST.
   return redirect(data.url, 303);
-
 }) satisfies APIRoute;

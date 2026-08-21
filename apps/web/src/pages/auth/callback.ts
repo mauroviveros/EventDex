@@ -1,5 +1,5 @@
-import { safeNext } from "@/lib/auth";
 import type { APIRoute } from "astro";
+import { safeNext } from "@/lib/auth";
 
 /**
  * Vuelta del proveedor OAuth: canjea el código por una sesión.

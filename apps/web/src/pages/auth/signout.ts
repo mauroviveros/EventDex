@@ -1,5 +1,5 @@
-import { safeNext } from "@/lib/auth";
 import type { APIRoute } from "astro";
+import { safeNext } from "@/lib/auth";
 
 /**
  * Cierra la sesión.
@@ -9,10 +9,10 @@ import type { APIRoute } from "astro";
  * navegador.
  */
 export const POST = (async ({ request, locals, redirect }) => {
-    const form = await request.formData();
-    const next = safeNext(form.get("next")?.toString());
+  const form = await request.formData();
+  const next = safeNext(form.get("next")?.toString());
 
-    await locals.supabase.auth.signOut();
+  await locals.supabase.auth.signOut();
 
-    return redirect(next, 303);
+  return redirect(next, 303);
 }) satisfies APIRoute;
