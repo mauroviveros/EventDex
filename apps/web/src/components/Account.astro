@@ -1,0 +1,63 @@
+---
+/**
+ * Estado de sesión del visitante: los dos botones de login, o quién sos.
+ *
+ * Se usa `getClaims()` y no `getUser()` porque verifica el JWT localmente con
+ * las claves asimétricas del proyecto, sin ir a la red. `getUser()` pega al
+ * servidor de Auth en CADA render, y esto va en el layout de una página
+ * pública que tiene que cargar rápido.
+ */
+const { supabase } = Astro.locals;
+const { data } = await supabase.auth.getClaims();
+const claims = data?.claims ?? null;
+
+// `user_metadata` viene del proveedor OAuth: es JSON libre, no tiene tipo.
+// El cast declara qué esperamos leer sin fingir que está garantizado.
+const metadata = claims?.user_metadata as
+  | { full_name?: string; name?: string; avatar_url?: string }
+  | undefined;
+
+const displayName = metadata?.full_name ?? metadata?.name ?? claims?.email ?? "Visitante";
+
+// Volver a la página donde estaba, no siempre a la home. Se saneará igual del
+// otro lado, pero mandar la ruta actual evita un rebote innecesario.
+const next = Astro.url.pathname + Astro.url.search;
+---
+{claims ? (
+  <div class="flex items-center gap-3">
+    {metadata?.avatar_url && (
+      <img src={metadata.avatar_url} alt="" width="32" height="32" class="rounded-full" />
+    )}
+    <span class="text-sm">{displayName}</span>
+    <form method="POST" action="/auth/signout">
+      <input type="hidden" name="next" value={next} />
+      <button type="submit" class="text-sm underline">
+        Salir
+      </button>
+    </form>
+  </div>
+): (
+  <div class="flex items-center gap-2">
+    <form method="POST" action="/auth/signin" class="flex items-center gap-2">
+      <input type="hidden" name="next" value={next} />
+
+      <button
+        type="submit"
+        name="provider"
+        value="google"
+        class="rounded border px-3 py-1.5 text-sm"
+      >
+        Entrar con Google
+      </button>
+
+      <button
+        type="submit"
+        name="provider"
+        value="github"
+        class="rounded border px-3 py-1.5 text-sm"
+      >
+        Entrar con GitHub
+      </button>
+    </form>
+  </div>
+)}

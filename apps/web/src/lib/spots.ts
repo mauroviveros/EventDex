@@ -42,6 +42,6 @@ export async function getEventSpots(supabase: Client, eventId: string): Promise<
     id: row.id,
     code: row.code,
     booth: row.booth,
-    ...resolveSpot(row, row.spot)
+    ...resolveSpot(row, row.spot),
   }));
 }

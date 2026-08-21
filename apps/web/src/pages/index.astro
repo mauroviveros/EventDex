@@ -1,4 +1,5 @@
 ---
+import Account from "@/components/Account.astro";
 import { getEventSpots } from "@/lib/spots";
 import "@/styles/global.css";
 import { eventPhase, formatScheduleLabel } from "@eventdex/domain";
@@ -44,7 +45,7 @@ const TYPE_LABEL = {
     <meta name="viewport" content="width=device-width" />
     <title>{event?.title ?? "Eventdex"}</title>
   </head>
-  <body class="mx-auto max-w-2xl p-8">
+  <body class="mx-auto max-w-2xl p-8 space-y-8">
     {
       event ? (
         <article>
@@ -98,5 +99,7 @@ const TYPE_LABEL = {
         <p>Todavía no hay eventos publicados.</p>
       )
     }
+
+    <Account />
   </body>
 </html>
