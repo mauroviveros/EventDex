@@ -1,8 +1,7 @@
 ---
-import Account from "@/components/Account.astro";
-import { getEventSpots } from "@/lib/spots";
-import "@/styles/global.css";
 import { eventPhase, formatScheduleLabel } from "@eventdex/domain";
+import Layout from "@/layouts/Layout.astro";
+import { getEventSpots } from "@/lib/spots";
 
 const { supabase, eventId } = Astro.locals;
 
@@ -38,15 +37,12 @@ const TYPE_LABEL = {
   activity: "Actividad",
 } as const;
 ---
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{event?.title ?? "Eventdex"}</title>
-  </head>
-  <body class="mx-auto max-w-2xl p-8 space-y-8">
-    {
+
+<Layout
+  title={event?.title ?? "Eventdex"}
+  description={event?.summary ?? undefined}
+>
+  {
       event ? (
         <article>
           {phase && <p class="text-sm uppercase tracking-wide">{PHASE_LABEL[phase]}</p>}
@@ -99,7 +95,4 @@ const TYPE_LABEL = {
         <p>Todavía no hay eventos publicados.</p>
       )
     }
-
-    <Account />
-  </body>
-</html>
+</Layout>

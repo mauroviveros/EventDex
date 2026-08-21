@@ -1,0 +1,33 @@
+---
+import Account from "@/components/Account.astro";
+import "@/styles/global.css";
+
+interface Props {
+  title: string;
+  /** Para la meta description y el OG. Opcional: no toda página tiene una. */
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <link rel="icon" href="/favicon.ico" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="canonical" href={Astro.url.href} />
+</head>
+<body class="mx-auto max-w-2xl p-8">
+  <header class="flex items-center justify-between gap-4 border-b pb-4">
+    <a href="/" class="font-semibold">Eventdex</a>
+    <Account />
+  </header>
+
+  <main class="space-y-8 pt-8">
+    <slot />
+  </main>
+</body>
+</html>
