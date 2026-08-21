@@ -1,0 +1,30 @@
+{
+  "name": "@eventdex/supabase",
+  "description": "Supabase clients wired",
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "exports": {
+    "./browser": "./src/browser.ts",
+    "./astro": "./src/astro.ts",
+    "./next": "./src/next.ts",
+    "./service": "./src/service.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@eventdex/db": "workspace:*",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3"
+  },
+  "devDependencies": {
+    "@eventdex/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
