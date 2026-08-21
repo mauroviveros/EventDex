@@ -41,14 +41,30 @@ directo contra el proyecto hosteado. Ver
 [el tradeoff y cómo se compensa](./sql/README.md#sin-db-reset-qué-se-pierde-y-cómo-se-compensa).
 
 - [x] Migraciones escritas en `supabase/migrations/` (001…008)
-- [ ] Proyecto Supabase nuevo, vacío. El de v1 no se toca: queda como respaldo
+- [x] Proyecto Supabase nuevo, vacío. El de v1 no se toca: queda como respaldo
       de consulta hasta que la v2 esté en producción
-- [ ] `pnpm db:link` contra el proyecto nuevo
-- [ ] Configurar el proveedor OAuth (Google) en el proyecto nuevo
-- [ ] `pnpm db:push` y verificar con `supabase/tests/verify.sql`
-- [ ] Crear los dos usuarios de prueba y correr `supabase/seed.sql`
-- [ ] `pnpm db:types` → `packages/db`
+- [x] `pnpm db:link` contra el proyecto nuevo
+- [x] `pnpm db:push` y verificar con `supabase/tests/verify.sql`
+- [x] Crear los dos usuarios de prueba y correr `supabase/seed.sql`
+- [x] `pnpm db:types` → `packages/db`
+- [ ] Configurar los proveedores OAuth (**Google** y **GitHub**) — ver Fase 4
 - [ ] Tests de permisos del checklist de [04](./04-rls.md#cómo-se-prueba)
+
+### Correcciones que salieron de cablear `apps/web`
+
+Dos huecos que ningún check podía ver hasta que una app consultó como visitante
+anónimo. Están en migraciones propias porque las migraciones son append-only:
+
+- [x] `010_public_catalog_reads` — `venues` y `spots` tenían políticas
+      `to authenticated`, así que el anónimo recibía **cero filas** de las dos:
+      sin sede en la landing y sin nombres en la grilla de stands. Contradecía
+      al [ADR-0003](./adr/0003-spots-reutilizables.md), que hace caer la
+      resolución a `spots.name`.
+- [x] `011_fix_owner_guard_on_cascade` — el trigger del último owner bloqueaba
+      el borrado en cascada de una organización entera.
+- [x] El seed publica con `publish_event()` en vez de escribir
+      `status = 'published'`: así congela los snapshots y ejercita la función.
+- [x] `supabase/snippets/reset-seed.sql` para volver a sembrar.
 
 **Commit:** `feat:🗃️ add v2 database schema with RLS`
 
@@ -56,24 +72,51 @@ directo contra el proyecto hosteado. Ver
 
 ## Fase 3 — Núcleo compartido
 
-- [ ] `packages/supabase` — clientes browser / astro / next / service
+- [x] `packages/db` — tipos generados + DTOs
+- [x] `packages/supabase` — clientes browser / astro / next / service
+- [x] `packages/domain` — fase del evento, resolución de spots, progreso y
+      elegibilidad de sorteo. **Puro, sin I/O, 34 tests sin un solo mock**
 - [ ] `packages/auth` — sesión y guards, un adaptador por runtime
-- [ ] `packages/domain` — fase del evento, resolución de spots, elegibilidad de
-      sorteo. **Puro, sin I/O, con tests**
 - [ ] `packages/ui` — tokens + primitivas shadcn compartidas
 
-**Commit:** `feat:📦 add shared packages (supabase, auth, domain, ui)`
+**`auth` y `ui` se difieren a propósito.** El camino del visitante no necesita
+guards: es `getClaims()` y listo. Lo que justifica un paquete de auth son los
+guards de membresía y rol, y esos aparecen recién con el admin (Fase 5).
+Escribir `requireMembership()` ahora sería adivinar la firma sin consumidor —
+el mismo criterio con el que quedaron afuera `slug.ts` y `canPublishEvent`.
+`ui` espera todavía más: con una sola app con pantallas, extraer componentes
+"compartidos" es especulativo.
+
+**Commit:** `feat:📦 add shared packages (db, supabase, domain)`
 
 ---
 
 ## Fase 4 — App pública (`apps/web`)
 
-- [ ] Middleware: host → organización → evento activo
-- [ ] `/` landing con countdown
-- [ ] `/s/[id]` reclamo de medalla
-- [ ] `/perfil` progreso del visitante
-- [ ] Auth callback
+- [x] Middleware: host → organización → evento activo, en `Astro.locals`
+- [x] `/` landing: fase, sede, jornadas formateadas y grilla de spots
+- [ ] `/` countdown (isla React, usa `timeUntil`)
+- [ ] Login con **Google** y **GitHub** + `auth/callback`
+- [ ] `/s/[id]` reclamo de medalla (`claim_spot()`)
+- [ ] `/perfil` progreso del visitante (usa `collectionProgress`)
 - [ ] SEO: metadata dinámica, JSON-LD `Event`, sitemap, robots
+
+### Sobre los proveedores de login
+
+Van **dos**: Google para los visitantes y **GitHub** para la cuenta de
+desarrollo. Supabase une por email verificado, así que la misma persona entrando
+por cualquiera de los dos cae en el mismo `auth.users` — importante para que la
+fila de `platform_admins` siga valiendo sin importar por dónde entró.
+
+Hay que habilitar ambos en el dashboard y autorizar las redirect URLs
+(`http://localhost:4321/auth/callback` en desarrollo).
+
+### Storage: pendiente sin resolver
+
+`spots.avatar_path`, `organizations.logo_path` y `events.cover_path` guardan
+rutas, pero **no hay ningún bucket creado ni políticas de Storage escritas**.
+Por eso la grilla de spots todavía no muestra imágenes. Hay que decidir buckets
+y políticas antes de que el admin permita subir archivos (Fase 5).
 
 **Commit:** `feat:✨ add public event app`
 

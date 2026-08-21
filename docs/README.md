@@ -35,7 +35,9 @@ Complementos:
 | Bloque | Estado |
 |--------|--------|
 | Stack y topología | ✅ Decidido |
-| Modelo de datos | 📝 Propuesto — pendiente tu revisión |
-| RLS | 📝 Propuesto — pendiente tu revisión |
+| Modelo de datos | ✅ Aplicado y seedeado |
+| RLS | ✅ Aplicado (+2 correcciones, ver [06](./06-roadmap.md)) |
 | Migración de datos de v1 | ✅ Descartada — se arranca con Supabase limpio |
-| Código de las apps | ⛔ No empezado |
+| `packages/` | ✅ config · db · domain · supabase — falta `auth` y `ui` |
+| `apps/web` | 🔸 middleware + landing con evento, sede, jornadas y spots |
+| `apps/admin` · `apps/landing` | ⛔ scaffolds vacíos |

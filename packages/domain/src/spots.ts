@@ -60,6 +60,16 @@ export function parseSnapshot(value: Json | null): Partial<SpotSnapshot> | null 
   return value as Partial<SpotSnapshot>;
 }
 
+/**
+ * Resuelve la presentación de un spot a partir de la relación con el evento y del catálogo.
+ *
+ * La relación con el evento puede tener overrides de nombre, descripción y avatar_path,
+ * y un snapshot congelado del catálogo. El catálogo tiene los datos originales.
+ *
+ * La resolución es: override > snapshot > catálogo.
+ *
+ * `type` no tiene override: es un dato de catálogo, no de presentación.
+ */
 export function resolveSpot(eventSpot: EventSpotOverrides, catalog: CatalogSpot): SpotPresentation {
   const snapshot = parseSnapshot(eventSpot.snapshot);
 

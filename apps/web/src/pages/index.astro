@@ -1,20 +1,26 @@
 ---
+import { getEventSpots } from "@/lib/spots";
 import "@/styles/global.css";
 import { eventPhase, formatScheduleLabel } from "@eventdex/domain";
 
 const { supabase, eventId } = Astro.locals;
-const { data: event } = eventId
-  ? await supabase
-      .from("events")
-      .select(`
-        id, title, edition_label, summary, timezone,
-        schedules:event_schedules(label, starts_at, ends_at),
-        venue:venues(name, city)
-      `)
-      .eq("id", eventId)
-      .single()
-  : { data: null };
 
+const [eventResult, spots] = await Promise.all([
+  eventId
+    ? supabase
+        .from("events")
+        .select(`
+          id, title, edition_label, summary, timezone,
+          schedules:event_schedules(label, starts_at, ends_at),
+          venue:venues(name, city)
+        `)
+        .eq("id", eventId)
+        .single()
+    : null,
+  eventId ? getEventSpots(supabase, eventId) : [],
+]);
+
+const event = eventResult?.data ?? null;
 const schedules = event?.schedules ?? [];
 const phase = eventPhase(schedules);
 
@@ -22,6 +28,13 @@ const PHASE_LABEL = {
   upcoming: "Próximamente",
   live: "En curso",
   finished: "Finalizado",
+} as const;
+
+const TYPE_LABEL = {
+  stand: "Stand",
+  attraction: "Atracción",
+  sponsor: "Sponsor",
+  activity: "Actividad",
 } as const;
 ---
 <html lang="es">
@@ -59,6 +72,27 @@ const PHASE_LABEL = {
               </li>
             ))}
           </ul>
+
+          {spots.length > 0 && (
+            <section class="mt-10">
+              <h2 class="text-xl font-semibold">
+                Coleccioná las {spots.length} medallas
+              </h2>
+
+              <ul class="mt-4 grid gap-4 sm:grid-cols-2">
+                {spots.map((spot) => (
+                  <li class="rounded-lg border p-4">
+                    <p class="text-xs uppercase tracking-wide">
+                      {TYPE_LABEL[spot.type]} · {spot.code}
+                    </p>
+                    <h3 class="mt-1 font-medium">{spot.name}</h3>
+                    {spot.description && <p class="mt-1 text-sm">{spot.description}</p>}
+                    {spot.booth && <p class="mt-2 text-xs">{spot.booth}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </article>
       ) : (
         <p>Todavía no hay eventos publicados.</p>
