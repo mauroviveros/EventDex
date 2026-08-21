@@ -18,12 +18,12 @@ describe("collectionProgress", () => {
     expect(collectionProgress([], []).percent).toBe(0);
   });
 
-  it("no felicita en un evento vacio", () => {
+  it("no felicita en un evento vacío", () => {
     // claimed >= total seria 0 >= 0 -> true sin el guard `total > 0`;
     expect(collectionProgress([], []).isComplete).toBe(false);
   });
 
-  it("un spot desactivado despues de reclamarlo no infla el porcentaje", () => {
+  it("un spot desactivado después de reclamarlo no infla el porcentaje", () => {
     // Reclamo los 5, el organizador bajo "e" a mitad del evento.
     const p = collectionProgress(SPOTS, SPOTS.slice(0, 4));
     expect(p).toMatchObject({
@@ -41,21 +41,21 @@ describe("collectionProgress", () => {
 });
 
 describe("raffleEligibility", () => {
-  it("entra al llegar al minimo", () => {
+  it("entra al llegar al mínimo", () => {
     expect(raffleEligibility(3, 3)).toMatchObject({
       isEligible: true,
       missing: 0,
     });
   });
 
-  it("dice cuantas faltan", () => {
+  it("dice cuántas faltan", () => {
     expect(raffleEligibility(1, 3)).toMatchObject({
       isEligible: false,
       missing: 2,
     });
   });
 
-  it("el staff no participa por mas medallas que junte", () => {
+  it("el staff no participa por más medallas que junte", () => {
     const e = raffleEligibility(99, 3, true);
     expect(e.isEligible).toBe(false);
     // Y no le decimos que le faltan: no le faltan, esta excluido.

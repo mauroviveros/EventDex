@@ -15,7 +15,7 @@ describe("countdown", () => {
     });
   });
 
-  it("no cuenta hacia atras cuando el objetivo ya paso", () => {
+  it("no cuenta hacia atrás cuando el objetivo ya pasó", () => {
     const pasado = Date.parse("2026-03-31T00:00:00+00:00"); // un día antes de AHORA
     expect(timeUntil(pasado, AHORA)).toMatchObject({
       days: 0,

@@ -30,7 +30,7 @@ describe("formatScheduleLabel", () => {
     expect(formatScheduleLabel(JORNADA, "Europe/Madrid")).toContain("GMT+2");
   });
 
-  it("es null con una fecha invalida en vez de romper el render", () => {
+  it("es null con una fecha inválida en vez de romper el render", () => {
     expect(formatScheduleLabel({ starts_at: "x", ends_at: "y" }, BA)).toBeNull();
   });
 });

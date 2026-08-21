@@ -55,6 +55,13 @@ describe("resolveSpot", () => {
   });
 
   it("ignora un snapshot que no sea un objeto", () => {
+    // `snapshot` es jsonb: puede llegar como string, número o array. Son las
+    // dos ramas de `parseSnapshot`, y las dos tienen que caer al catálogo.
+    expect(resolveSpot({ ...SIN_NADA, snapshot: "roto" }, CATALOGO).name).toBe("Café Ubbe");
+    expect(resolveSpot({ ...SIN_NADA, snapshot: [] }, CATALOGO).name).toBe("Café Ubbe");
+  });
+
+  it("`type` sale del snapshot cuando está congelado", () => {
     const publicado = { ...SIN_NADA, snapshot: { type: "attraction" } };
     expect(resolveSpot(publicado, CATALOGO).type).toBe("attraction");
   });

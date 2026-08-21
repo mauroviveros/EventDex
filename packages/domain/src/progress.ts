@@ -79,7 +79,6 @@ export interface RaffleEligibility {
  * Cuenta RECLAMOS, no puntos. Si algún día el sorteo pondera por `points`,
  * hay que cambiar los dos lados juntos.
  */
-
 export function raffleEligibility(
   claims: number,
   minClaims: number,
