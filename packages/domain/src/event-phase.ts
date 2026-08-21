@@ -1,17 +1,8 @@
 import type { Enums } from "@eventdex/db";
+import type { ScheduleLike } from "./schedule";
 
 /** La fase la define la base (enum `event_phase`); aca solo la reusamos. */
 export type EventPhase = Enums<"event_phase">;
-
-/**
- * Lo MÍNIMO que necesita el cálculo. No pide `Tables<"event_schedules">`
- * entera: así sirve igual para una fila de la base, para un formulario a
- * medio llenar, o para un objeto de test escrito a mano.
- */
-export interface ScheduleLike {
-  starts_at: string;
-  ends_at: string;
-}
 
 export interface EventRange {
   start: number;

@@ -1,7 +1,4 @@
-export interface ScheduleLike {
-  starts_at: string;
-  ends_at: string;
-}
+import type { ScheduleLike } from "./schedule";
 
 /**
  * Etiqueta legible de una jornada, en la zona horaria DEL EVENTO.
@@ -38,6 +35,48 @@ export function formatScheduleLabel(
 }
 
 /**
+ * Cache de formatters.
+ *
+ * Construir un `Intl.DateTimeFormat` es de las operaciones más caras de `Intl`
+ * —carga los datos del locale— y `formatScheduleLabel` arma cuatro por
+ * llamada. En una lista de jornadas, o en la grilla de eventos del admin, eso
+ * se multiplica rápido.
+ *
+ * Los formatters son inmutables y sin estado, así que reusarlos es seguro. El
+ * cache tampoco crece sin control: cuatro entradas por combinación de locale y
+ * zona horaria, y en la práctica hay una sola de cada.
+ */
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+function formatter(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  // La clave incluye TODAS las opciones y no solo locale + zona: con una clave
+  // más pobre, pedir el formatter de la hora devolvería el que se cacheó para
+  // la fecha. Los objetos se arman siempre con las mismas claves en el mismo
+  // orden, así que `JSON.stringify` es estable.
+  const key = `${locale}|${JSON.stringify(options)}`;
+
+  let cached = formatters.get(key);
+  if (!cached) {
+    cached = new Intl.DateTimeFormat(locale, options);
+    formatters.set(key, cached);
+  }
+
+  return cached;
+}
+
+/** Una parte de un `formatToParts`, o "" si el formatter no la produjo. */
+function partOf(
+  parts: readonly Intl.DateTimeFormatPart[],
+  type: Intl.DateTimeFormatPartTypes
+): string {
+  return parts.find((part) => part.type === type)?.value ?? "";
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
  * "Domingo 5 de abril".
  *
  * Se arma con `formatToParts` y no con `format()` porque el string que devuelve
@@ -51,24 +90,19 @@ export function formatScheduleLabel(
  * `dateStyle` y aceptar el formato que dicte el locale.
  */
 function formatDay(date: Date, timeZone: string, locale: string): string {
-  const parts = new Intl.DateTimeFormat(locale, {
+  const parts = formatter(locale, {
     timeZone,
     weekday: "long",
     day: "numeric",
-    month: "long"
+    month: "long",
   }).formatToParts(date);
 
-  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find(p => p.type === type)?.value ?? "";
-
-  const weekday = get("weekday");
-  const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-
-  return `${capitalized} ${get("day")} de ${get("month")}`;
+  return `${capitalize(partOf(parts, "weekday"))} ${partOf(parts, "day")} de ${partOf(parts, "month")}`;
 }
 
 /** "20:00" — 24 horas siempre, sin importar lo que prefiera el locale. */
 function formatTime(date: Date, timeZone: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
+  return formatter(locale, {
     timeZone,
     hour: "2-digit",
     minute: "2-digit",
@@ -85,10 +119,10 @@ function formatTime(date: Date, timeZone: string, locale: string): string {
  * le pasamos el `date` real al formatter, Intl resuelve el DST solo.
  */
 function formatZone(date: Date, timeZone: string, locale: string): string {
-  const parts = new Intl.DateTimeFormat(locale, {
+  const parts = formatter(locale, {
     timeZone,
-    timeZoneName: "shortOffset"
+    timeZoneName: "shortOffset",
   }).formatToParts(date);
 
-  return parts.find((part) => part.type === "timeZoneName")?.value ?? "";
+  return partOf(parts, "timeZoneName");
 }
