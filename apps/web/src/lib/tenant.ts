@@ -2,7 +2,7 @@ import { PUBLIC_DEV_HOST } from "astro:env/server";
 import type { Client } from "@eventdex/supabase/astro";
 
 /**
- * Hostname que decine qué organización se sirve.
+ * Hostname que decide qué organización se sirve.
  *
  * un solo deployment atiende a todos los clientes y la organización sale del `Host` de cada request.
  *

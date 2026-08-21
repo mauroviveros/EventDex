@@ -9,7 +9,7 @@ const config = {
 /**
  * Cliente para el request en curso, con la sesión del visitante.
  *
- * See crea uno por request y no un singleton de módulo: el cliente lleva las
+ * Se crea uno por request y no un singleton de módulo: el cliente lleva las
  * cookies de ESTE visitante. Uno compartido entre requests mezclaría sesiones
  * en el servidor.
  */
