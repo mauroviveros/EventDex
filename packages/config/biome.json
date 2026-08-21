@@ -15,7 +15,8 @@
       "!**/.vercel/**",
       "!**/public/**",
       "!**/next-env.d.ts",
-      "!**/pnpm-lock.yaml"
+      "!**/pnpm-lock.yaml",
+      "!**/database.types.ts"
     ]
   },
   "formatter": {
