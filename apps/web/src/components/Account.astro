@@ -19,7 +19,9 @@ const metadata = claims?.user_metadata as
 
 const displayName = metadata?.full_name ?? metadata?.name ?? claims?.email ?? "Visitante";
 
-interface Props { next?: string; }
+interface Props {
+  next?: string;
+}
 const { next = Astro.url.pathname + Astro.url.search } = Astro.props;
 ---
 {claims ? (

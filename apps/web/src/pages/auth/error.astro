@@ -17,7 +17,7 @@ const REASONS: Record<string, string> = {
   exchange: "No pudimos intercambiar el código por un token de acceso.",
   access_denied: "El proveedor denegó el acceso.",
   server_error: "Ocurrió un error en el servidor. Probá de nuevo en un momento.",
-}
+};
 
 const raw = Astro.url.searchParams.get("reason");
 const message = (raw && REASONS[raw]) ?? "No pudimos completar el ingreso.";
