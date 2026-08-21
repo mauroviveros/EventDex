@@ -6,8 +6,8 @@ const BA = "America/Argentina/Buenos_Aires";
 // Domingo 5 de abril de 2026, 20:00 a 01:00 hora argentina.
 const JORNADA = {
   starts_at: "2026-04-05T23:00:00+00:00",
-  ends_at: "2026-04-06T04:00:00+00:00"
-}
+  ends_at: "2026-04-06T04:00:00+00:00",
+};
 
 describe("formatScheduleLabel", () => {
   it("formatea en la zona del evento", () => {

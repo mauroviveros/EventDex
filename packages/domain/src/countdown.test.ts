@@ -11,7 +11,7 @@ describe("countdown", () => {
       hours: 5,
       minutes: 30,
       seconds: 15,
-      isDone: false
+      isDone: false,
     });
   });
 
@@ -22,8 +22,8 @@ describe("countdown", () => {
       hours: 0,
       minutes: 0,
       seconds: 0,
-      isDone: true
-    })
+      isDone: true,
+    });
   });
 
   it("isDone justo en el instante objetivo", () => {

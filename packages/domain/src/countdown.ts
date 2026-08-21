@@ -20,6 +20,6 @@ export function timeUntil(target: number, now: number = Date.now()): Countdown {
     hours: Math.floor((seconds % 86_400) / 3_600),
     minutes: Math.floor((seconds % 3_600) / 60),
     seconds: seconds % 60,
-    isDone: total === 0
-  }
+    isDone: total === 0,
+  };
 }
