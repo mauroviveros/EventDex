@@ -42,3 +42,5 @@ export function createClient({ url, key }: PublicConfig, context: AstroContext):
     },
   });
 }
+
+export type { Client } from "./types";

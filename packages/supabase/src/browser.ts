@@ -12,3 +12,5 @@ import type { Client, PublicConfig } from "./types";
 export function createClient({ url, key }: PublicConfig): Client {
   return createBrowserClient<Database>(url, key);
 }
+
+export type { Client } from "./types";

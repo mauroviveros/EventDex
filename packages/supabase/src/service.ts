@@ -35,3 +35,5 @@ export function createServiceClient({ url, serviceRoleKey }: ServiceConfig): Cli
     },
   });
 }
+
+export type { Client } from "./types";

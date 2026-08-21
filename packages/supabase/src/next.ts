@@ -27,3 +27,5 @@ export function createClient({ url, key }: PublicConfig, store: NextCookieStore)
     },
   });
 }
+
+export type { Client } from "./types";
