@@ -26,13 +26,13 @@ jobs:
       PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Sin `version:` — la toma de `packageManager` en el package.json de la
       # raíz. Así pnpm se actualiza en un solo lugar.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # La versión que declara `engines`, no la que usás local (24). Correr
           # el piso es lo que detecta que usaste una API que no existe ahí.
