@@ -1,7 +1,15 @@
 {
-    "conventionalCommits.scopes": [
-        "web",
-        "landing",
-        "admin"
-    ]
+  "conventionalCommits.scopes": [
+    "web",
+    "landing",
+    "admin",
+    "config",
+    "db",
+    "domain",
+    "supabase"
+  ],
+  "material-icon-theme.files.associations": {
+    "robots.txt.ts": "robots",
+    "sitemap.xml.ts": "xml"
+  }
 }
