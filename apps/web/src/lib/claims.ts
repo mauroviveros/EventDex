@@ -61,3 +61,24 @@ export async function hasClaimed(
 
   return (count ?? 0) > 0;
 }
+
+/**
+ * Ids de los spots que este visitante ya reclamó en un evento.
+ *
+ * Devuelve ids y no un conteo porque `collectionProgress` los intersecta con
+ * los spots activos: con dos números sueltos no se puede saber que uno de los
+ * reclamos era de un stand que el organizador desactivó a mitad del evento.
+ */
+export async function getClaimedSpotIds(
+  supabase: Client,
+  eventId: string,
+  userId: string
+): Promise<string[]> {
+  const { data } = await supabase
+    .from("spot_claims")
+    .select("event_spot_id")
+    .eq("user_id", userId)
+    .eq("event_id", eventId);
+
+  return (data ?? []).map(({ event_spot_id }) => event_spot_id);
+}

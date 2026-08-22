@@ -26,10 +26,17 @@ const { next = Astro.url.pathname + Astro.url.search } = Astro.props;
 ---
 {claims ? (
   <div class="flex items-center gap-3">
-    {metadata?.avatar_url && (
-      <img src={metadata.avatar_url} alt="" width="32" height="32" class="rounded-full" />
-    )}
-    <span class="text-sm">{displayName}</span>
+    <a
+      href="/perfil"
+      class="flex items-center gap-2 text-sm hover:underline"
+      aria-current={Astro.url.pathname === "/perfil" ? "page" : undefined}
+    >
+      {metadata?.avatar_url && (
+        <img src={metadata.avatar_url} alt="" width="32" height="32" class="rounded-full" />
+      )}
+      <span class="text-sm">{displayName}</span>
+    </a>
+
     <form method="POST" action="/auth/signout">
       <input type="hidden" name="next" value={next} />
       <button type="submit" class="text-sm underline">
