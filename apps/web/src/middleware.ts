@@ -21,6 +21,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (!tenant) return new Response("Dominio no configurado", { status: 404 });
 
   context.locals.organizationId = tenant.organizationId;
+  context.locals.organizationName = tenant.organizationName;
+  context.locals.brand = tenant.brand;
   context.locals.eventId = tenant.eventId;
 
   return next();
