@@ -17,7 +17,7 @@
     "start": "next start",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "check-types": "tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.3.0",
