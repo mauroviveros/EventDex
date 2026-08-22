@@ -32,7 +32,12 @@ const { next = Astro.url.pathname + Astro.url.search } = Astro.props;
 
     <form method="POST" action="/auth/signout">
       <input type="hidden" name="next" value={next} />
-      <button type="submit" class="text-sm underline">
+      {/*
+        `min-h-6` = 24px, el mínimo de WCAG 2.2 AA (2.5.8) para un objetivo
+        táctil. Sin padding el link quedaba en ~20px, y esto se usa en un
+        celular caminando por un predio.
+      */}
+      <button type="submit" class="min-h-6 px-2 text-sm underline">
         Salir
       </button>
     </form>

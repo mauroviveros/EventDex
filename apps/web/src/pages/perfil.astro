@@ -37,7 +37,16 @@ const progress = collectionProgress(
           {progress.claimed} de {progress.total} medallas
         </h1>
 
-        <div class="h-2 w-full overflow-hidden rounded bg-black/10">
+        {/*
+          `aria-hidden` y no `role="progressbar"`: el `<h1>` de arriba ya dice
+          "3 de 5 medallas", así que la barra es una representación visual de
+          algo que el lector de pantalla ya anunció. Darle semántica de
+          progressbar haría que lo diga dos veces.
+
+          `bg-muted` y no `bg-black/10`: los tokens contemplan modo oscuro, y
+          negro sobre negro desaparece.
+        */}
+        <div class="h-2 w-full overflow-hidden rounded bg-muted" aria-hidden="true">
           <div class="h-full bg-brand" style={`width: ${progress.percent}%`}></div>
         </div>
 
@@ -52,8 +61,21 @@ const progress = collectionProgress(
       <ul class="grid gap-3 sm:grid-cols-2">
        {spots.map((spot) => {
         const got = claimed.has(spot.id);
+
+        // El estado pendiente se baja de énfasis con tokens y no con
+        // `opacity-40`: la opacidad aplastaba el contraste de ~17:1 a ~2:1, muy
+        // por debajo del 4.5:1 que pide WCAG AA. Y no es texto decorativo
+        // —dice qué stand te falta— así que tiene que leerse.
+        //
+        // `muted-foreground` sobre `muted` queda alrededor de 5:1: pasa AA y
+        // sigue viéndose secundario.
         return (
-          <li class:list={["rounded-lg border p-4", got ? "" : "opacity-40"]}>
+          <li
+            class:list={[
+              "rounded-lg border p-4",
+              got ? "" : "bg-muted text-muted-foreground",
+            ]}
+          >
             <p class="text-xs uppercase tracking-wide">
               {got ? "Conseguida" : "Pendiente"} · {spot.code}
             </p>
