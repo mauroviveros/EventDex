@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { safeNext } from "@/lib/auth";
+import { authErrorPath, safeNext } from "@/lib/auth";
 
 /**
  * Vuelta del proveedor OAuth: canjea el código por una sesión.
@@ -19,11 +19,11 @@ export const GET = (async ({ url, locals, redirect }) => {
   const oauthError = url.searchParams.get("error");
 
   if (oauthError) return redirect(`/auth/error?reason=${encodeURIComponent(oauthError)}`, 303);
-  if (!code) return redirect("/auth/error?reason=missing-code", 303);
+  if (!code) return redirect(authErrorPath("missing-code"), 303);
 
   const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
 
-  if (error) return redirect("/auth/error?reason=exchange", 303);
+  if (error) return redirect(authErrorPath("exchange"), 303);
 
   return redirect(next, 303);
 }) satisfies APIRoute;

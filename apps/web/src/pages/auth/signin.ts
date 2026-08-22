@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { isAuthProvider, safeNext } from "@/lib/auth";
+import { authErrorPath, isAuthProvider, safeNext } from "@/lib/auth";
 
 /**
  * Arranca el login OAuth.
@@ -19,7 +19,7 @@ export const POST = (async ({ request, locals, redirect }) => {
   const next = safeNext(form.get("next")?.toString());
 
   // si el provider no es válido, redirige a la página de error con un código de razón
-  if (!isAuthProvider(provider)) return redirect("/auth/error?reason=provider", 303);
+  if (!isAuthProvider(provider)) return redirect(authErrorPath("provider"), 303);
 
   const { origin } = new URL(request.url);
   const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
@@ -29,7 +29,7 @@ export const POST = (async ({ request, locals, redirect }) => {
     options: { redirectTo },
   });
 
-  if (error || !data.url) return redirect("/auth/error?reason=oauth", 303);
+  if (error || !data.url) return redirect(authErrorPath("oauth"), 303);
 
   // 303 y no 302: convierte el POST en un GET, que es lo que espera el
   // proveedor. Con 302 algunos clientes reenvían el POST.

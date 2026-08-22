@@ -1,26 +1,16 @@
 ---
 import Account from "@/components/Account.astro";
 import Layout from "@/layouts/Layout.astro";
+import { authErrorMessage } from "@/lib/auth";
 
 /**
  * Adónde caen los fallos de `/auth/signin` y `/auth/callback`.
  *
- * El `reason` llega por query string, o sea que es texto del cliente. NUNCA se
- * renderiza crudo: se usa solo como clave de este diccionario. Mostrarlo tal
- * cual dejaría que `?reason=Tu cuenta fue bloqueada, llamá al 0800...` se
- * imprima como si fuera un mensaje nuestro.
+ * El diccionario de motivos vive en `lib/auth.ts`, junto a las rutas que los
+ * producen: es un contrato entre tres archivos y tener los strings en uno solo
+ * hace que un typo en un redirect no compile.
  */
-const REASONS: Record<string, string> = {
-  provider: "Ese proveedor de ingreso no está habilitado.",
-  oauth: "No pudimos contactar al proveedor. Probá de nuevo en un momento.",
-  "missing-code": "El proveedor no devolvió un código de autorización.",
-  exchange: "No pudimos intercambiar el código por un token de acceso.",
-  access_denied: "El proveedor denegó el acceso.",
-  server_error: "Ocurrió un error en el servidor. Probá de nuevo en un momento.",
-};
-
-const raw = Astro.url.searchParams.get("reason");
-const message = (raw && REASONS[raw]) ?? "No pudimos completar el ingreso.";
+const message = authErrorMessage(Astro.url.searchParams.get("reason"));
 ---
 
 <Layout
