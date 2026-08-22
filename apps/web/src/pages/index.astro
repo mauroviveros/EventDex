@@ -1,50 +1,35 @@
 ---
 import { eventPhase, eventRange, formatScheduleLabel } from "@eventdex/domain";
+import JsonLd from "@/components/JsonLd.astro";
 import Countdown from "@/islands/Countdown";
 import Layout from "@/layouts/Layout.astro";
+import { getActiveEvent } from "@/lib/events";
+import { PHASE_LABEL, SPOT_TYPE_LABEL } from "@/lib/labels";
+import { eventJsonLd } from "@/lib/seo";
 import { getEventSpots } from "@/lib/spots";
 
-const { supabase, eventId } = Astro.locals;
-
-const [eventResult, spots] = await Promise.all([
-  eventId
-    ? supabase
-        .from("events")
-        .select(`
-          id, title, edition_label, summary, timezone,
-          schedules:event_schedules(label, starts_at, ends_at),
-          venue:venues(name, city)
-        `)
-        .eq("id", eventId)
-        .single()
-    : null,
+const { supabase, eventId, organizationName } = Astro.locals;
+const [event, spots] = await Promise.all([
+  eventId ? getActiveEvent(supabase, eventId) : null,
   eventId ? getEventSpots(supabase, eventId) : [],
 ]);
-
-const event = eventResult?.data ?? null;
 const schedules = event?.schedules ?? [];
 const phase = eventPhase(schedules);
 const range = eventRange(schedules);
 const now = Date.now();
 
-const PHASE_LABEL = {
-  upcoming: "Próximamente",
-  live: "En curso",
-  finished: "Finalizado",
-} as const;
-
-const TYPE_LABEL = {
-  stand: "Stand",
-  attraction: "Atracción",
-  sponsor: "Sponsor",
-  activity: "Actividad",
-} as const;
+const jsonLd =
+  event && range ? eventJsonLd({ event, range, url: Astro.url, organizationName }) : null;
 ---
 
 <Layout
   title={event?.title ?? "Eventdex"}
   description={event?.summary ?? undefined}
 >
+  <Fragment slot="head">
+    {jsonLd && <JsonLd data={jsonLd} />}
+  </Fragment>
+
   {
       event ? (
         <article>
@@ -87,7 +72,7 @@ const TYPE_LABEL = {
                 {spots.map((spot) => (
                   <li class="rounded-lg border p-4">
                     <p class="text-xs uppercase tracking-wide">
-                      {TYPE_LABEL[spot.type]} · {spot.code}
+                      {SPOT_TYPE_LABEL[spot.type]} · {spot.code}
                     </p>
                     <h3 class="mt-1 font-medium">{spot.name}</h3>
                     {spot.description && <p class="mt-1 text-sm">{spot.description}</p>}
