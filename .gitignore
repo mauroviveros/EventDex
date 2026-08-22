@@ -41,3 +41,6 @@ yarn-error.log*
 # Regenerados por `next dev` en cada corrida
 apps/admin/AGENTS.md
 apps/admin/CLAUDE.md
+
+# Permisos locales de Claude Code (personales, con rutas absolutas)
+.claude/settings.local.json
