@@ -1,0 +1,52 @@
+name: CI
+
+# Sin `pull_request` por ahora: estás trabajando directo sobre `refactor/v2`,
+# así que un trigger de PR no correría nunca. Cuando empieces a usar PRs se
+# agrega y se limita el push a `main` para no correr dos veces lo mismo.
+on: push
+
+# Un push nuevo cancela el run anterior de la misma rama: no tiene sentido
+# terminar de verificar un commit que ya quedó viejo.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    env:
+      # `apps/web` declara estas dos como REQUERIDAS en su `env.schema`, así que
+      # sin ellas `astro build` falla antes de compilar nada.
+      #
+      # Son valores de relleno y alcanza: con `output: "server"` ninguna página
+      # se ejecuta en build, así que nadie se conecta a Supabase. El build acá
+      # verifica que compile, no que la config sea real.
+      PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sin `version:` — la toma de `packageManager` en el package.json de la
+      # raíz. Así pnpm se actualiza en un solo lugar.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # La versión que declara `engines`, no la que usás local (24). Correr
+          # el piso es lo que detecta que usaste una API que no existe ahí.
+          node-version: 22
+          cache: pnpm
+
+      # `--frozen-lockfile` falla si el lockfile no coincide con los
+      # package.json. Es lo que agarra el "commiteé la dependencia pero no el
+      # lock", que en local no se nota porque tu node_modules ya la tiene.
+      - run: pnpm install --frozen-lockfile
+
+      # Pasos separados y no un `&&`: así la pestaña de Actions te dice cuál
+      # falló sin abrir el log.
+      - run: pnpm lint
+      - run: pnpm check-types
+      - run: pnpm test
+      - run: pnpm build
