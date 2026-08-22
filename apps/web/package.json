@@ -19,7 +19,9 @@
     "astro": "astro",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "check-types": "astro check"
+    "check-types": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",
@@ -38,6 +40,7 @@
     "@eventdex/config": "workspace:*",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
