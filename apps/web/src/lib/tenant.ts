@@ -36,9 +36,7 @@ export interface Tenant {
  * que apunta acá pero no está dado de alta, y la respuesta correcta es 404.
  */
 export async function resolveTenant(supabase: Client, hostname: string): Promise<Tenant | null> {
-  const { data } = await supabase
-    .rpc("resolve_site", { p_hostname: hostname })
-    .maybeSingle();
+  const { data } = await supabase.rpc("resolve_site", { p_hostname: hostname }).maybeSingle();
 
   if (!data) return null;
 

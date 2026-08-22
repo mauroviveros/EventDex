@@ -126,3 +126,34 @@ function formatZone(date: Date, timeZone: string, locale: string): string {
 
   return partOf(parts, "timeZoneName");
 }
+
+/**
+ * Un instante como ISO 8601 en la zona del evento: "2026-09-19T21:00:00-03:00".
+ *
+ * `toISOString()` daría el mismo instante en UTC, que es igual de correcto como
+ * dato pero se lee distinto: 21:00 GMT-3 es medianoche UTC del día siguiente, y
+ * Google usa `startDate` para mostrar el DÍA del evento. Con el offset explícito
+ * la fecha local es inequívoca.
+ */
+export function toZonedIso(instant: number, timeZone: string): string {
+  const parts = formatter("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    // h23 y no `hour12: false`: en algunas implementaciones `hour12: false`
+    // devuelve "24" para medianoche en vez de "00".
+    hourCycle: "h23",
+    timeZoneName: "longOffset",
+  }).formatToParts(new Date(instant));
+
+  const date = `${partOf(parts, "year")}-${partOf(parts, "month")}-${partOf(parts, "day")}`;
+  const time = `${partOf(parts, "hour")}:${partOf(parts, "minute")}:${partOf(parts, "second")}`;
+  // `longOffset` devuelve "GMT-03:00", o "GMT" pelado en UTC.
+  const zone = partOf(parts, "timeZoneName").replace("GMT", "");
+
+  return `${date}T${time}${zone || "Z"}`;
+}
