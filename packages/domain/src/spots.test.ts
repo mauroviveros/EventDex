@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveSpot } from "./spots";
+import { parseSnapshot, resolveSpot } from "./spots";
 
 const CATALOGO = {
   name: "Café Ubbe",
@@ -64,5 +64,18 @@ describe("resolveSpot", () => {
   it("`type` sale del snapshot cuando está congelado", () => {
     const publicado = { ...SIN_NADA, snapshot: { type: "attraction" } };
     expect(resolveSpot(publicado, CATALOGO).type).toBe("attraction");
+  });
+});
+
+describe("parseSnapshot", () => {
+  it("devuelve null si no es un objeto", () => {
+    expect(parseSnapshot("roto")).toBeNull();
+    expect(parseSnapshot(42)).toBeNull();
+    expect(parseSnapshot([])).toBeNull();
+    expect(parseSnapshot(null)).toBeNull();
+  });
+
+  it("deja pasar un objeto tal cual", () => {
+    expect(parseSnapshot({ name: "Café Ubbe" })).toEqual({ name: "Café Ubbe" });
   });
 });

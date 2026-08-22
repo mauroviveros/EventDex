@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatScheduleLabel } from "./schedule-label";
+import { formatScheduleLabel, toZonedIso } from "./schedule-label";
 
 const BA = "America/Argentina/Buenos_Aires";
 
@@ -32,5 +32,27 @@ describe("formatScheduleLabel", () => {
 
   it("es null con una fecha inválida en vez de romper el render", () => {
     expect(formatScheduleLabel({ starts_at: "x", ends_at: "y" }, BA)).toBeNull();
+  });
+});
+
+describe("toZonedIso", () => {
+  it("usa el offset de la zona del evento", () => {
+    const instante = Date.parse("2026-09-20T00:00:00+00:00");
+
+    expect(toZonedIso(instante, "America/Argentina/Buenos_Aires")).toBe(
+      "2026-09-19T21:00:00-03:00"
+    );
+  });
+
+  it("el mismo instante en otra zona da otra fecha local", () => {
+    // Es el caso que justifica la función: medianoche UTC ya es el día 20 en
+    // Madrid y todavía el 19 en Buenos Aires.
+    const instante = Date.parse("2026-09-20T00:00:00+00:00");
+
+    expect(toZonedIso(instante, "Europe/Madrid")).toBe("2026-09-20T02:00:00+02:00");
+  });
+
+  it("en UTC devuelve Z", () => {
+    expect(toZonedIso(Date.parse("2026-09-20T00:00:00Z"), "UTC")).toBe("2026-09-20T00:00:00Z");
   });
 });
