@@ -2,16 +2,16 @@
 import { collectionProgress } from "@eventdex/domain";
 import Account from "@/components/Account.astro";
 import Layout from "@/layouts/Layout.astro";
+import { getVisitor } from "@/lib/auth";
 import { getClaimedSpotIds } from "@/lib/claims";
 import { getEventSpots } from "@/lib/spots";
 
 const { supabase, eventId } = Astro.locals;
-const { data: auth } = await supabase.auth.getClaims();
-const userId = auth?.claims?.sub ?? null;
+const visitor = await getVisitor(supabase);
 
 const [spots, claimedIds] = await Promise.all([
   eventId ? getEventSpots(supabase, eventId) : [],
-  eventId && userId ? getClaimedSpotIds(supabase, eventId, userId) : [],
+  eventId && visitor?.id ? getClaimedSpotIds(supabase, eventId, visitor.id) : [],
 ]);
 
 const claimed = new Set(claimedIds);
@@ -22,7 +22,7 @@ const progress = collectionProgress(
 ---
 
 <Layout title="Mis medallas" noindex>
-  {!userId ? (
+  {visitor ? (
     <div class="space-y-3">
       <h1 class="text-2xl font-semibold">Mis medallas</h1>
       <p>Entrá para ver tu colección.</p>

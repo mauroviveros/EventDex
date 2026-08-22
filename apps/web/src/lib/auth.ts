@@ -1,3 +1,5 @@
+import type { Client } from "@eventdex/supabase/astro";
+
 /**
  * Proveedores habilitados.
  *
@@ -31,4 +33,85 @@ export function safeNext(raw: string | null | undefined): string {
   if (!raw.startsWith("/")) return "/";
   if (raw.startsWith("//") || raw.startsWith("/\\")) return "/";
   return raw;
+}
+
+/**
+ * Motivos de fallo de login, con su mensaje.
+ *
+ * Vive acá y no en la página de error porque el contrato está partido: quien
+ * PRODUCE el motivo son las rutas de `/auth`, y quien lo CONSUME es la página.
+ * Con los strings sueltos en tres archivos, un `?reason=exchanges` mal escrito
+ * no rompe nada — el visitante ve el mensaje genérico y nadie se entera.
+ *
+ * `access_denied` y `server_error` los manda el proveedor OAuth, no nosotros:
+ * están para poder traducirlos, pero la búsqueda necesita fallback igual porque
+ * el proveedor puede devolver cualquier código.
+ */
+export const AUTH_ERROR_REASONS = {
+  provider: "Ese proveedor de ingreso no está habilitado.",
+  oauth: "No pudimos contactar al proveedor. Probá de nuevo en un momento.",
+  "missing-code": "El proveedor no devolvió un código de autorización.",
+  exchange: "No pudimos intercambiar el código por un token de acceso.",
+  access_denied: "El proveedor denegó el acceso.",
+  server_error: "Ocurrió un error en el servidor. Probá de nuevo en un momento.",
+} as const;
+
+export type AuthErrorReason = keyof typeof AUTH_ERROR_REASONS;
+
+/**
+ * Ruta de la página de error para un motivo conocido.
+ *
+ * El tipo del parámetro es lo que convierte un typo en el redirect en un error
+ * de compilación en vez de un mensaje genérico en producción.
+ */
+export function authErrorPath(reason: AuthErrorReason): string {
+  return `/auth/error?reason=${reason}`;
+}
+
+/**
+ * Mensaje para un motivo que llega por query string.
+ *
+ * El `reason` es texto del cliente: se usa SOLO como clave de búsqueda, nunca
+ * se renderiza crudo. Así `?reason=Tu cuenta fue bloqueada, llamá al 0800...`
+ * cae al mensaje genérico en vez de imprimirse como si fuera nuestro.
+ */
+export function authErrorMessage(raw: string | null | undefined): string {
+  if (raw && raw in AUTH_ERROR_REASONS) {
+    return AUTH_ERROR_REASONS[raw as AuthErrorReason];
+  }
+  return "No pudimos completar el ingreso.";
+}
+
+export interface Visitor {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+  email: string | null;
+}
+
+/**
+ * Quién es el visitante de este request, o null si no hay sesión.
+ *
+ * `getClaims()` y no `getUser()`: verifica el JWT localmente con las claves
+ * asimétricas del proyecto, sin ir a la red. `getUser()` pega al servidor de
+ * Auth en cada llamada, y esto se usa en cada página.
+ */
+export async function getVisitor(supabase: Client): Promise<Visitor | null> {
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+
+  if (!claims?.sub) return null;
+
+  // `user_metadata` lo escribe el proveedor OAuth: es JSON libre, sin tipo.
+  // Google manda `full_name`, GitHub suele mandar `name`.
+  const metadata = claims.user_metadata as
+    | { full_name?: string; name?: string; avatar_url?: string }
+    | undefined;
+
+  return {
+    id: claims.sub,
+    displayName: metadata?.full_name ?? metadata?.name ?? claims.email ?? "Visitante",
+    avatarUrl: metadata?.avatar_url ?? null,
+    email: claims.email ?? null,
+  };
 }
