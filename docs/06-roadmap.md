@@ -95,11 +95,27 @@ el mismo criterio con el que quedaron afuera `slug.ts` y `canPublishEvent`.
 
 - [x] Middleware: host → organización → evento activo, en `Astro.locals`
 - [x] `/` landing: fase, sede, jornadas formateadas y grilla de spots
-- [ ] `/` countdown (isla React, usa `timeUntil`)
-- [ ] Login con **Google** y **GitHub** + `auth/callback`
-- [ ] `/s/[id]` reclamo de medalla (`claim_spot()`)
-- [ ] `/perfil` progreso del visitante (usa `collectionProgress`)
-- [ ] SEO: metadata dinámica, JSON-LD `Event`, sitemap, robots
+- [x] `/` countdown (isla React, usa `timeUntil`)
+- [x] Login con **Google** y **GitHub** + `auth/callback` + `auth/error`
+- [x] `/s/[id]` reclamo de medalla (`claim_spot()`)
+- [x] `/perfil` progreso del visitante (usa `collectionProgress`)
+- [x] SEO: Open Graph, JSON-LD `Event`, sitemap y robots por host
+- [ ] `og:image` — **bloqueado por Storage**, ver más abajo
+
+### Lo que salió de cablear la app
+
+- [x] `resolve_site()` — el middleware hacía dos viajes por request y el primero
+      tiraba el resto de la fila. Ahora resuelve organización + evento en una
+      sola llamada, y de paso trae el nombre y la marca para el `<title>` y el
+      `og:site_name`.
+- [x] `toZonedIso()` en domain — Google usa `startDate` para mostrar el **día**,
+      y un evento que arranca 21:00 GMT-3 es medianoche UTC del día siguiente.
+      Emitir en UTC mostraba la fecha corrida.
+- [x] **CI** (`.github/workflows/ci.yml`) — lint, types, tests y build en cada
+      push. Encontró un bug en el primer intento: `apps/admin` typechequeaba
+      solo porque `.next/types/` ya existía en la máquina de desarrollo.
+- [x] **51 tests** — 39 en `domain`, 12 en `apps/web`. Los de `safeNext` cubren
+      la prevención de open redirect, que era código de seguridad sin red.
 
 ### Sobre los proveedores de login
 
@@ -111,18 +127,39 @@ fila de `platform_admins` siga valiendo sin importar por dónde entró.
 Hay que habilitar ambos en el dashboard y autorizar las redirect URLs
 (`http://localhost:4321/auth/callback` en desarrollo).
 
-### Storage: pendiente sin resolver
+### Storage: prerrequisito de la Fase 5
 
 `spots.avatar_path`, `organizations.logo_path` y `events.cover_path` guardan
 rutas, pero **no hay ningún bucket creado ni políticas de Storage escritas**.
-Por eso la grilla de spots todavía no muestra imágenes. Hay que decidir buckets
-y políticas antes de que el admin permita subir archivos (Fase 5).
+
+Empezó como deuda de SEO —por eso la grilla de spots no muestra imágenes y falta
+el `og:image`— pero **cambió de categoría**: el dashboard necesita subir avatares
+de spots, el logo de la organización y la portada del evento. El formulario de
+spots lo va a pedir enseguida, así que conviene resolverlo temprano en la Fase 5
+y no al final.
 
 **Commit:** `feat:✨ add public event app`
 
 ---
 
 ## Fase 5 — Dashboard (`apps/admin`)
+
+Dos cosas antes de escribir pantallas:
+
+- [ ] **Tests de permisos RLS** — el checklist de
+      [04](./04-rls.md#cómo-se-prueba). El admin es donde viven `owner`,
+      `staff`, `manager`, `exhibitor` y `developer`, y hasta ahora solo se
+      ejercitaron dos roles: anónimo y visitante. Los **dos huecos de RLS que
+      aparecieron** en la Fase 4 los encontramos de casualidad cableando una
+      pantalla; con cinco roles y veinte tablas, esperar a que aparezcan solos
+      es una apuesta. Descubrir que `staff` puede borrar con diez vistas ya
+      escritas cuesta mucho más que descubrirlo ahora.
+- [ ] **Buckets y políticas de Storage** — ver Fase 4.
+- [ ] `packages/auth` — extraer los guards cuando el admin muestre su forma
+      real. `apps/web/src/lib/session.ts` (`getVisitor`) es la mitad que ya
+      existe y está probada.
+
+Después sí:
 
 - [ ] **`/login` y `/denied`** — en v1 no existen y `requireMembership()` redirige
       a un 404; empezar por acá
