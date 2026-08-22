@@ -8,6 +8,14 @@ export interface EventSpotCard extends SpotPresentation {
   booth: string | null;
 }
 
+export interface EventSpotDetail extends SpotPresentation {
+  id: string;
+  code: string;
+  booth: string | null;
+  eventId: string;
+  eventTitle: string;
+}
+
 /**
  * Spots visibles del evento, con la cadena de resolución ya aplicada.
  *
@@ -44,4 +52,38 @@ export async function getEventSpots(supabase: Client, eventId: string): Promise<
     booth: row.booth,
     ...resolveSpot(row, row.spot),
   }));
+}
+
+/**
+ * Un spot puntual, o null si no existe / RLS lo oculta.
+ *
+ * `maybeSingle()` y no `single()`: acá "no hay fila" es un caso normal —un QR
+ * viejo, un id inventado—, no un error. Con `single()` tendrías que distinguir
+ * el error de "cero filas" del error de verdad.
+ *
+ * Un `id` que no sea un UUID válido hace fallar la query en Postgres, no acá.
+ * Cae en el `error` y devolvemos null igual, que es la respuesta correcta.
+ */
+export async function getEventSpot(supabase: Client, id: string): Promise<EventSpotDetail | null> {
+  const { data, error } = await supabase
+    .from("event_spots")
+    .select(`
+      id, code, booth, event_id,
+      name_override, description_override, avatar_path_override, snapshot,
+      spot:spots!inner (name, description, avatar_path, type),
+      event:events!inner (title)
+    `)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    code: data.code,
+    booth: data.booth,
+    eventId: data.event_id,
+    eventTitle: data.event.title,
+    ...resolveSpot(data, data.spot),
+  };
 }

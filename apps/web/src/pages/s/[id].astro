@@ -1,0 +1,65 @@
+---
+import Account from "@/components/Account.astro";
+import Layout from "@/layouts/Layout.astro";
+import { type ClaimOutcome, claimSpot, hasClaimed } from "@/lib/claims";
+import { getEventSpot } from "@/lib/spots";
+
+const { supabase } = Astro.locals;
+const { id } = Astro.params;
+
+const spot = id ? await getEventSpot(supabase, id) : null;
+if (!spot) return new Response("Stand no encontrado", { status: 404 });
+
+const { data: auth } = await supabase.auth.getClaims();
+const userId = auth?.claims?.sub ?? null;
+
+// El reclamo va por POST: un GET tiene que ser seguro, y lo disparan el
+// prefetch del navegador y la vista previa de algunos escáneres de QR.
+let outcome: ClaimOutcome | null = null;
+if (Astro.request.method === "POST") {
+  outcome = await claimSpot(supabase, spot.id);
+}
+
+// Si acabamos de reclamar ya sabemos el estado; si no, hay que preguntarlo.
+const already =
+  outcome?.status === "claimed" || outcome?.status === "already"
+    ? true
+    : userId
+      ? await hasClaimed(supabase, spot.id, userId)
+      : false;
+---
+
+<Layout
+  title={`${spot.name} · ${spot.eventTitle}`}
+>
+  <article class="space-y-4">
+    <p class="text-xs uppercase tracking-wide">{spot.code}</p>
+    <h1 class="text-3xl font-semibold text-brand">{spot.name}</h1>
+    {spot.description && <p>{spot.description}</p>}
+    {spot.booth && <p class="text-sm">{spot.booth}</p>}
+
+    {outcome?.status === "claimed" && (
+      <p class="rounded border p-4">
+        🎉 ¡Medalla conseguida! Llevás {outcome.totalClaims}.
+      </p>
+    )}
+    {outcome?.status === "not-live" && <p class="rounded border p-4">El evento no está en curso.</p>}
+    {outcome?.status === "unavailable" && <p class="rounded border p-4">Este stand ya no está activo.</p>}
+    {outcome?.status === "error" && <p class="rounded border p-4">No pudimos registrar la medalla.</p>}
+
+    {!userId ? (
+      <div class="space-y-2">
+        <p>Entrá para reclamar tu medalla.</p>
+        <Account />
+      </div>
+    ) : already ? (
+      <p class="rounded border p-4">Ya tenés esta medalla.</p>
+    ) : (
+      <form method="POST">
+        <button type="submit" class="rounded border px-4 py-2 font-medium">
+          Reclamar medalla
+        </button>
+      </form>
+    )}
+  </article>
+</Layout>
