@@ -1612,6 +1612,16 @@ export type Database = {
         Returns: string
       }
       resolve_organization: { Args: { p_hostname: string }; Returns: string }
+      resolve_site: {
+        Args: { p_hostname: string }
+        Returns: {
+          brand: Json
+          event_id: string
+          organization_id: string
+          organization_name: string
+          organization_slug: string
+        }[]
+      }
       void_draw: {
         Args: { p_draw_id: string; p_reason: string }
         Returns: undefined
