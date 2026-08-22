@@ -4,24 +4,46 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".vercel/output/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".vercel/output/**"],
+      // `.env` está en .gitignore, y los inputs por defecto son los archivos
+      // trackeados: sin esto, cambiar `PUBLIC_SUPABASE_URL` devolvería un build
+      // cacheado con la variable vieja ya inlineada en el bundle del cliente.
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
+
+    // Nodo de tránsito: no existe como script en ningún package.
+    //
+    // Los packages exportan `.ts` crudo y NO tienen tarea `build`, así que un
+    // `dependsOn: ["^build"]` en lint/check-types/test no resolvía a nada — sin
+    // arista en el grafo, cambiar `packages/domain` no invalidaba el cache de
+    // `apps/web#check-types`, aunque la app typechequea ese código con SU
+    // compilador. Turbo devolvía un hit viejo.
+    //
+    // `transit` crea la relación de dependencia sin forzar ejecución
+    // secuencial: las tareas siguen corriendo en paralelo, pero con el hash
+    // correcto.
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["transit"]
     },
     "format": {
       "cache": false
     },
     "check-types": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["transit"]
     },
+    // Sin `outputs`: ningún package genera coverage todavía, y declararlo hacía
+    // que turbo avisara "no output files found" en cada corrida. Cuando se
+    // active coverage, vuelve.
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": ["transit"]
     }
   }
 }
