@@ -152,8 +152,16 @@ export function toZonedIso(instant: number, timeZone: string): string {
 
   const date = `${partOf(parts, "year")}-${partOf(parts, "month")}-${partOf(parts, "day")}`;
   const time = `${partOf(parts, "hour")}:${partOf(parts, "minute")}:${partOf(parts, "second")}`;
-  // `longOffset` devuelve "GMT-03:00", o "GMT" pelado en UTC.
-  const zone = partOf(parts, "timeZoneName").replace("GMT", "");
+  // `longOffset` devuelve "GMT-03:00". Para UTC no hay acuerdo entre versiones
+  // de ICU: unas devuelven "GMT" pelado y otras "GMT+00:00" — de hecho macOS y
+  // el runner de Ubuntu difieren.
+  //
+  // Los dos son ISO 8601 válido, pero el string se normaliza a "Z" para que el
+  // mismo instante produzca la MISMA salida en cualquier máquina. Esto termina
+  // en el JSON-LD de una página cacheable: que dependa de la versión de ICU del
+  // servidor que atendió el request es una diferencia que no queremos rastrear.
+  const offset = partOf(parts, "timeZoneName").replace("GMT", "");
+  const zone = offset === "" || offset === "+00:00" ? "Z" : offset;
 
-  return `${date}T${time}${zone || "Z"}`;
+  return `${date}T${time}${zone}`;
 }
