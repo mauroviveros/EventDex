@@ -1,5 +1,6 @@
 ---
-import { eventPhase, formatScheduleLabel } from "@eventdex/domain";
+import { eventPhase, eventRange, formatScheduleLabel } from "@eventdex/domain";
+import Countdown from "@/islands/Countdown";
 import Layout from "@/layouts/Layout.astro";
 import { getEventSpots } from "@/lib/spots";
 
@@ -23,6 +24,8 @@ const [eventResult, spots] = await Promise.all([
 const event = eventResult?.data ?? null;
 const schedules = event?.schedules ?? [];
 const phase = eventPhase(schedules);
+const range = eventRange(schedules);
+const now = Date.now();
 
 const PHASE_LABEL = {
   upcoming: "Próximamente",
@@ -69,6 +72,10 @@ const TYPE_LABEL = {
               </li>
             ))}
           </ul>
+
+          {phase === "upcoming" && range && (
+            <Countdown target={range.start} now={now} client:idle />
+          )}
 
           {spots.length > 0 && (
             <section class="mt-10">
