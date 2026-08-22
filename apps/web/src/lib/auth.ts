@@ -1,5 +1,3 @@
-import type { Client } from "@eventdex/supabase/astro";
-
 /**
  * Proveedores habilitados.
  *
@@ -80,38 +78,4 @@ export function authErrorMessage(raw: string | null | undefined): string {
     return AUTH_ERROR_REASONS[raw as AuthErrorReason];
   }
   return "No pudimos completar el ingreso.";
-}
-
-export interface Visitor {
-  id: string;
-  displayName: string;
-  avatarUrl: string | null;
-  email: string | null;
-}
-
-/**
- * Quién es el visitante de este request, o null si no hay sesión.
- *
- * `getClaims()` y no `getUser()`: verifica el JWT localmente con las claves
- * asimétricas del proyecto, sin ir a la red. `getUser()` pega al servidor de
- * Auth en cada llamada, y esto se usa en cada página.
- */
-export async function getVisitor(supabase: Client): Promise<Visitor | null> {
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
-
-  if (!claims?.sub) return null;
-
-  // `user_metadata` lo escribe el proveedor OAuth: es JSON libre, sin tipo.
-  // Google manda `full_name`, GitHub suele mandar `name`.
-  const metadata = claims.user_metadata as
-    | { full_name?: string; name?: string; avatar_url?: string }
-    | undefined;
-
-  return {
-    id: claims.sub,
-    displayName: metadata?.full_name ?? metadata?.name ?? claims.email ?? "Visitante",
-    avatarUrl: metadata?.avatar_url ?? null,
-    email: claims.email ?? null,
-  };
 }

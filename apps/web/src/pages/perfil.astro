@@ -2,8 +2,8 @@
 import { collectionProgress } from "@eventdex/domain";
 import Account from "@/components/Account.astro";
 import Layout from "@/layouts/Layout.astro";
-import { getVisitor } from "@/lib/auth";
 import { getClaimedSpotIds } from "@/lib/claims";
+import { getVisitor } from "@/lib/session";
 import { getEventSpots } from "@/lib/spots";
 
 const { supabase, eventId } = Astro.locals;
