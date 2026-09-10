@@ -26,6 +26,7 @@
     "db:new": "supabase migration new",
     "db:diff": "supabase db diff --linked",
     "db:push": "supabase db push",
+    "db:test": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f supabase/tests/permissions.sql",
     "db:pull": "supabase db pull",
     "db:types": "mkdir -p packages/db/src && supabase gen types typescript --linked --schema public > packages/db/src/database.types.ts"
   },

@@ -48,7 +48,8 @@ directo contra el proyecto hosteado. Ver
 - [x] Crear los dos usuarios de prueba y correr `supabase/seed.sql`
 - [x] `pnpm db:types` → `packages/db`
 - [ ] Configurar los proveedores OAuth (**Google** y **GitHub**) — ver Fase 4
-- [ ] Tests de permisos del checklist de [04](./04-rls.md#cómo-se-prueba)
+- [x] Tests de permisos del checklist de [04](./04-rls.md#cómo-se-prueba) —
+      `supabase/tests/permissions.sql`, `pnpm db:test`
 
 ### Correcciones que salieron de cablear `apps/web`
 
@@ -146,18 +147,16 @@ y no al final.
 
 Dos cosas antes de escribir pantallas:
 
-- [ ] **Tests de permisos RLS** — el checklist de
-      [04](./04-rls.md#cómo-se-prueba). El admin es donde viven `owner`,
-      `staff`, `manager`, `exhibitor` y `developer`, y hasta ahora solo se
-      ejercitaron dos roles: anónimo y visitante. Los **dos huecos de RLS que
-      aparecieron** en la Fase 4 los encontramos de casualidad cableando una
-      pantalla; con cinco roles y veinte tablas, esperar a que aparezcan solos
-      es una apuesta. Descubrir que `staff` puede borrar con diez vistas ya
-      escritas cuesta mucho más que descubrirlo ahora.
+- [x] **Tests de permisos RLS** — el checklist de
+      [04](./04-rls.md#cómo-se-prueba), en `supabase/tests/permissions.sql`. El
+      admin es donde viven `owner`, `staff`, `manager`, `exhibitor` y
+      `developer`, y hasta ahora solo se ejercitaron dos roles: anónimo y
+      visitante. Los **dos huecos de RLS que aparecieron** en la Fase 4 los
+      encontramos de casualidad cableando una pantalla; con cinco roles y veinte
+      tablas, esperar a que aparezcan solos es una apuesta. Descubrir que
+      `staff` puede borrar con diez vistas ya escritas cuesta mucho más que
+      descubrirlo ahora.
 - [ ] **Buckets y políticas de Storage** — ver Fase 4.
-- [ ] `packages/auth` — extraer los guards cuando el admin muestre su forma
-      real. `apps/web/src/lib/session.ts` (`getVisitor`) es la mitad que ya
-      existe y está probada.
 
 Después sí:
 
@@ -169,6 +168,28 @@ Después sí:
 - [ ] Generación de QR
 - [ ] Participantes y métricas
 - [ ] Sorteo (mudado desde la app pública)
+- [ ] `packages/auth` — extraer los guards **una vez que se repitan**, no antes
+
+### Los tests de permisos
+
+`supabase/tests/permissions.sql`, el hermano de `verify.sql`: aquel verifica la
+forma del esquema, este su comportamiento. Se corre con `pnpm db:test` y se lee
+con los ojos — imprime `OK` o `FALLA` por control.
+
+Sin pgTAP a propósito: es el mismo SQL de las migraciones, sin framework nuevo.
+Lo que se pierde es el verde/rojo automático, así que **hay que acordarse de
+correrlo antes de cada `db:push` que toque políticas**. El razonamiento completo
+y el camino para automatizarlo después están en
+[04](./04-rls.md#lo-que-este-archivo-no-es).
+
+### Por qué `packages/auth` bajó al final
+
+Estaba listado como prerrequisito y se contradecía con la Fase 3, que tiene
+razón: *"escribir `requireMembership()` ahora sería adivinar la firma sin
+consumidor"*. Ese consumidor es `/login` y `/denied`. Extraer el paquete antes
+de tenerlos es adivinar igual, solo que con más ceremonia. Los guards van inline
+en `apps/admin` y se mudan cuando la tercera pantalla repita el mismo guard,
+junto con `getVisitor` de `apps/web/src/lib/session.ts`.
 
 **Commit:** `feat:✨ add organization dashboard`
 

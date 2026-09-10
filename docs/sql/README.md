@@ -39,6 +39,24 @@ psql "$DATABASE_URL" -f supabase/seed.sql
 psql "$DATABASE_URL" -f supabase/tests/verify.sql
 ```
 
+Y la verificación de permisos, que es la que hay que volver a correr cada vez
+que se toca una política. Arma su propio mundo (dos organizaciones, un usuario
+por rol) dentro de una transacción que se revierte, así que no depende del seed
+ni deja nada atrás:
+
+```bash
+pnpm db:test    # supabase/tests/permissions.sql
+```
+
+`seed.sql` y `verify.sql` necesitan el cliente `psql`, que no viene con el CLI
+de Supabase (`brew install libpq` y agregarlo al PATH); sin él se pegan en el
+SQL Editor salteando las líneas que empiezan con `\echo`, que son comandos de
+psql y no SQL.
+
+`permissions.sql` **no tiene `\echo`**: está escrito para funcionar igual en los
+dos lados, y termina con un solo `select` porque el SQL Editor muestra el
+resultado de una sola sentencia cuando corrés varias.
+
 Para volver a correr el seed hay que borrar antes la organización de prueba, y
 un `delete from organizations` pelado no alcanza (`event_invoices` y
 `event_spots.spot_id` son `on delete restrict`). Usá el snippet:

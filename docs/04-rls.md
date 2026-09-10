@@ -292,29 +292,86 @@ En v1 hay tres casos que caen exactamente ahí y en v2 se resuelven con RLS:
 
 Sin tests, una matriz de permisos de este tamaño se rompe sola.
 
-Al no haber stack local, corren **contra el proyecto hosteado**, dentro de una
-transacción que se revierte al final. pgTAP está disponible en Supabase hosted;
-hay que habilitarlo una vez (`create extension if not exists pgtap with schema
-extensions`).
+El archivo es `supabase/tests/permissions.sql`, el hermano de `verify.sql`:
+aquel verifica la **forma** del esquema (RLS activo, vistas con
+`security_invoker`), este verifica su **comportamiento**, poniendo la sesión en
+los zapatos de cada rol.
+
+Se corre **pegándolo entero en el SQL Editor** del dashboard, o con
+`pnpm db:test` si tenés el cliente `psql` instalado.
+
+Todos los controles se acumulan en una tabla y el archivo termina con **un solo
+`select`**. No es cosmético: el SQL Editor
+[muestra el resultado de una sola sentencia](https://github.com/orgs/supabase/discussions/14206)
+cuando corrés varias, así que treinta `select` sueltos ahí no servirían de nada.
+La columna `fallas_totales` se repite en cada fila y es lo primero que hay que
+mirar: si da 0, pasaron todos.
+
+Al no haber stack local corre **contra el proyecto hosteado**, dentro de una
+transacción que se revierte al final. Eso es lo que permite que el fixture cree
+sus propios usuarios: no persiste ninguna credencial porque no persiste ninguna
+fila. Nacen sin `encrypted_password` y con emails en el TLD `.invalid`.
+
+Ponerse en los zapatos de alguien son dos líneas:
 
 ```sql
-begin;
--- pgTAP: por cada tabla y cada rol, afirmar qué ve y qué no.
+-- El claim `sub` es lo que devuelve auth.uid(), del que cuelgan los helpers
+-- app.*. El claim `role` es lo que hace que las políticas `to authenticated`
+-- apliquen: sin él, auth.role() miente.
+select set_config('request.jwt.claims',
+  json_build_object('sub', '<uuid>', 'role', 'authenticated')::text, true);
 set local role authenticated;
-set local request.jwt.claims = '{"sub":"<uuid-del-visitante>"}';
-select is_empty('select * from events where status = ''draft''');
-rollback;  -- nada de esto toca los datos reales
 ```
+
+El fixture arma **dos organizaciones**, y la B queda entera en privado (su
+evento nunca se publica). Con un evento publicado varias tablas serían visibles
+por diseño —eventos públicos, sus jornadas, sus spots activos, los ganadores del
+sorteo— y habría que ir tabla por tabla discutiendo cuál cero es el correcto.
+Con la B en borrador, la respuesta esperada es cero en todo.
+
+El control de aislamiento no se escribe tabla por tabla: se recorre
+`information_schema` buscando las relaciones con `organization_id` (el principio
+2 de este documento) y se cuenta sobre cada una. Así una tabla nueva queda
+cubierta el día que se crea, que es justo el día en que uno se olvida de
+escribirle la política. Incluye las **vistas** a propósito: son
+`security_invoker`, así que también tienen que filtrar.
+
+Cada control tiene su gemelo positivo. Un cero puede significar "la política
+funciona" o "la política está tan cerrada que no devuelve nada nunca", y el
+segundo caso también es un bug — solo que se descubre más tarde y desde una
+pantalla rota.
 
 Mínimo a cubrir antes de dar el esquema por bueno:
 
-- [ ] Un usuario de la org A no ve **ninguna** fila de la org B, en ninguna tabla.
-- [ ] `anon` ve eventos publicados y no ve borradores.
-- [ ] `anon` no ve spots inactivos ni borrados.
-- [ ] Un `staff` no puede borrar; un `owner` sí.
-- [ ] Un expositor solo actualiza sus columnas y sus filas.
-- [ ] Un developer lee todo y no puede escribir nada fuera de facturación.
-- [ ] Nadie puede insertar en `spot_claims` salteando `claim_spot()`.
-- [ ] No se puede reclamar sin registro previo.
+- [x] Un usuario de la org A no ve **ninguna** fila de la org B, en ninguna tabla.
+- [x] `anon` ve eventos publicados y no ve borradores.
+- [x] `anon` no ve spots inactivos ni borrados.
+- [x] Un `staff` no puede borrar; un `owner` sí.
+- [x] Un expositor solo actualiza sus columnas y sus filas.
+- [x] Un developer lee todo y no puede escribir nada fuera de facturación.
+- [x] Nadie puede insertar en `spot_claims` salteando `claim_spot()`.
+- [x] No se puede reclamar sin registro previo.
 
-Estos tests son la red que hace que tocar una política después no dé miedo.
+Dos excepciones documentadas, que el script saltea a propósito y no son olvidos:
+`organization_domains` es un lookup de host abierto (no revela nada que el DNS no
+diga ya) y `organizations` es pública para las organizaciones activas.
+
+### Lo que este archivo NO es
+
+**No es una red de regresión.** Se lee con los ojos: marca `OK` o `FALLA` por
+control, y no devuelve un código de salida distinto de cero cuando algo se rompe.
+El día que una migración futura rompa una política, este archivo no avisa solo —
+hay que acordarse de correrlo antes de cada `db:push` que toque políticas.
+
+Se eligió así a propósito, para no meter un framework antes de necesitarlo. La
+alternativa es pgTAP, que está disponible en Supabase hosted y se habilita una
+vez (`create extension if not exists pgtap with schema extensions`): da verde o
+rojo y se puede colgar de CI. Cuando se quiera, el fixture de `permissions.sql`
+—que es el trabajo caro— se reusa tal cual y solo hay que envolver las queries
+en `is_empty()` / `results_eq()`.
+
+Para colgarlo de CI falta antes el **proyecto de staging** del punto 3 de
+[`sql/README.md`](./sql/README.md#sin-db-reset-qué-se-pierde-y-cómo-se-compensa):
+darle a GitHub Actions el connection string del único proyecto que existe hoy es
+regalarle una credencial de superusuario a producción, aunque la transacción se
+revierta.
